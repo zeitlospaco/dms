@@ -11,8 +11,8 @@ from sklearn.model_selection import cross_val_score
 import joblib
 import numpy as np
 from datetime import datetime
-from sqlalchemy.orm import Session
-from ..models import Feedback, Document, Base
+from sqlalchemy.orm import Session, sessionmaker
+from ..models import Feedback, Document, Base, ModelMetrics
 from ..database import engine
 
 class AICategorization:
@@ -125,17 +125,41 @@ class AICategorization:
         if evaluate and len(texts) >= 3:  # Only evaluate if we have enough samples
             # Perform cross-validation
             cv_scores = cross_val_score(self.classifier, texts, categories, cv=3)
+            precision_scores = cross_val_score(self.classifier, texts, categories, cv=3, scoring='precision_weighted')
+            recall_scores = cross_val_score(self.classifier, texts, categories, cv=3, scoring='recall_weighted')
+            f1_scores = cross_val_score(self.classifier, texts, categories, cv=3, scoring='f1_weighted')
+            
             metrics = {
-                'accuracy_mean': float(np.mean(cv_scores)),
-                'accuracy_std': float(np.std(cv_scores)),
+                'accuracy': float(np.mean(cv_scores)),
+                'precision': float(np.mean(precision_scores)),
+                'recall': float(np.mean(recall_scores)),
+                'f1_score': float(np.mean(f1_scores)),
                 'training_samples': len(texts),
+                'validation_samples': len(texts) // 3,  # 1/3 of data used for validation in 3-fold CV
                 'timestamp': datetime.utcnow().isoformat(),
                 'version': self.version
             }
             
-            # Save metrics
+            # Save metrics to file
             with open(self.metrics_path, 'w') as f:
                 json.dump(metrics, f)
+                
+            # Save metrics to database
+            Base.metadata.create_all(bind=engine)
+            db = Session(engine)
+            try:
+                db_metrics = ModelMetrics(
+                    accuracy=metrics['accuracy'],
+                    precision=metrics['precision'],
+                    recall=metrics['recall'],
+                    f1_score=metrics['f1_score'],
+                    training_samples=metrics['training_samples'],
+                    validation_samples=metrics['validation_samples']
+                )
+                db.add(db_metrics)
+                db.commit()
+            finally:
+                db.close()
         
         # Save the model with version
         joblib.dump(self.classifier, self.model_path)
