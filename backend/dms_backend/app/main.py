@@ -10,11 +10,12 @@ from app.models import Base, User, Document, Folder
 from app.routers import auth, documents, categories, logs, notifications, optimization, feedback
 from app.services.google_drive import GoogleDriveService
 from app.services.folder_structure import FolderStructureService
+from app.services.model_trainer import start_model_trainer
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="DMS API")
+app = FastAPI(title="DMS API", on_startup=[start_model_trainer])
 
 # Configure CORS
 origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173").split(",")
