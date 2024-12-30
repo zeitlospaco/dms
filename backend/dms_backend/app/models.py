@@ -27,6 +27,8 @@ class Document(Base):
     google_drive_id = Column(String, unique=True)
     mime_type = Column(String)
     size_bytes = Column(Float)
+    extracted_text = Column(String, nullable=True)
+    confidence_score = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     modified_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))

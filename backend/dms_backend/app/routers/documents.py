@@ -4,11 +4,17 @@ from typing import List, Optional
 from datetime import datetime
 from google.oauth2.credentials import Credentials
 import json
+import os
 
 from app.database import get_db
-from app.models import Document, User, Folder
+from app.models import Document, User, Folder, Category
 from app.services.google_drive import GoogleDriveService
 from app.services.folder_structure import FolderStructureService
+from app.services.ai_categorization import AICategorization
+
+# Initialize AI service if enabled
+ENABLE_AI = os.getenv("ENABLE_AI_CATEGORIZATION", "false").lower() == "true"
+ai_service = AICategorization() if ENABLE_AI else None
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -45,37 +51,109 @@ def get_drive_service(db: Session = Depends(get_db)) -> GoogleDriveService:
 async def upload_document(
     file: UploadFile = File(...),
     folder_id: Optional[int] = None,
+    category_name: Optional[str] = None,
     db: Session = Depends(get_db),
     drive_service: GoogleDriveService = Depends(get_drive_service)
 ):
     """Upload a document to Google Drive and store metadata in database"""
-    # Read file content
-    content = await file.read()
-    
-    # Get target folder
-    folder = None
-    if folder_id:
-        folder = db.query(Folder).filter(Folder.id == folder_id).first()
-        if not folder:
-            raise HTTPException(status_code=404, detail="Folder not found")
-    
-    # Upload to Google Drive
-    drive_file = drive_service.upload_file(
-        name=file.filename,
-        content=content,
-        mime_type=file.content_type,
-        parent_id=folder.drive_id if folder else None
-    )
-    
-    # Create document record
-    document = Document(
-        filename=file.filename,
-        drive_id=drive_file['id'],
-        size_bytes=drive_file.get('size'),
-        folder_id=folder_id
-    )
-    db.add(document)
-    db.commit()
+    try:
+        # Read file content
+        content = await file.read()
+        
+        # Process with AI if enabled
+        extracted_text = None
+        confidence_score = None
+        suggested_category = None
+        suggested_folder = None
+        
+        if ENABLE_AI and ai_service:
+            try:
+                # Extract text using Google Cloud Vision
+                extracted_text = ai_service.extract_text(content)
+                
+                # Analyze entities and get suggestions
+                entities = ai_service.analyze_entities(extracted_text)
+                suggestions = ai_service.suggest_folder(extracted_text, entities)
+                
+                # Get category suggestion
+                if category_name:
+                    # Use provided category for training
+                    confidence_score = ai_service.classify_document(extracted_text, category_name)
+                    suggested_category = category_name
+                else:
+                    # Get AI suggestion
+                    suggested_category, confidence_score = ai_service.predict_category(extracted_text)
+                
+                # Update folder suggestion
+                if not folder_id and suggestions:
+                    folder_service = FolderStructureService(db, drive_service)
+                    suggested_folder = folder_service.create_year_month_structure(
+                        suggestions.get('year'),
+                        suggestions.get('month'),
+                        None  # Root folder
+                    )
+                    folder_id = suggested_folder.id
+            except Exception as e:
+                print(f"AI processing error: {str(e)}")
+                # Continue without AI processing
+        
+        # Get target folder
+        folder = None
+        if folder_id:
+            folder = db.query(Folder).filter(Folder.id == folder_id).first()
+            if not folder:
+                raise HTTPException(status_code=404, detail="Folder not found")
+        
+        # Upload to Google Drive
+        drive_file = drive_service.upload_file(
+            name=file.filename,
+            content=content,
+            mime_type=file.content_type,
+            parent_id=folder.drive_id if folder else None
+        )
+        
+        # Create document record
+        document = Document(
+            filename=file.filename,
+            google_drive_id=drive_file['id'],
+            mime_type=file.content_type,
+            size_bytes=drive_file.get('size'),
+            folder_id=folder_id,
+            extracted_text=extracted_text,
+            confidence_score=confidence_score
+        )
+        
+        # Add category if suggested or provided
+        if suggested_category or category_name:
+            category = db.query(Category).filter(
+                Category.name == (category_name or suggested_category)
+            ).first()
+            if not category:
+                category = Category(name=category_name or suggested_category)
+                db.add(category)
+            document.categories.append(category)
+        
+        db.add(document)
+        db.commit()
+        db.refresh(document)
+        
+        return {
+            "document": document,
+            "ai_processing": {
+                "category_suggestion": suggested_category,
+                "confidence_score": confidence_score,
+                "folder_suggestion": {
+                    "id": suggested_folder.id if suggested_folder else None,
+                    "name": suggested_folder.name if suggested_folder else None
+                } if suggested_folder else None
+            } if ENABLE_AI else None
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing document: {str(e)}"
+        )
     
     
     return document

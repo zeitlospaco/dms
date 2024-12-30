@@ -7,7 +7,7 @@ import os
 
 from app.database import get_db, engine
 from app.models import Base, User, Document, Folder
-from app.routers import auth, documents
+from app.routers import auth, documents, categories
 from app.services.google_drive import GoogleDriveService
 from app.services.folder_structure import FolderStructureService
 
@@ -29,6 +29,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(documents.router)
+app.include_router(categories.router)
 
 # Webhook endpoint for Google Drive Push Notifications
 @app.post("/webhook/drive")
