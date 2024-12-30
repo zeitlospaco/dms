@@ -1,7 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { categoryService } from '../../services/categories';
-import { Category } from '../../services/drive';
 
 interface CategorySelectProps {
   value?: number;
