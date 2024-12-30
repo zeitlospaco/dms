@@ -9,6 +9,18 @@ document_categories = Table('document_categories', Base.metadata,
     Column('category_id', Integer, ForeignKey('categories.id'))
 )
 
+# Association table for model performance tracking
+model_metrics = Table('model_metrics', Base.metadata,
+    Column('id', Integer, primary_key=True),
+    Column('timestamp', DateTime, default=datetime.utcnow),
+    Column('accuracy', Float),
+    Column('precision', Float),
+    Column('recall', Float),
+    Column('f1_score', Float),
+    Column('training_size', Integer),
+    Column('validation_size', Integer)
+)
+
 class User(Base):
     __tablename__ = "users"
 
@@ -20,6 +32,7 @@ class User(Base):
     documents = relationship("Document", back_populates="owner")
     logs = relationship("LogEntry", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+    feedback = relationship("Feedback", back_populates="user")
 
 class Document(Base):
     __tablename__ = "documents"
@@ -31,6 +44,8 @@ class Document(Base):
     size_bytes = Column(Float)
     extracted_text = Column(String, nullable=True)
     confidence_score = Column(Float, nullable=True)
+    ai_prediction = Column(String, nullable=True)  # Store the AI's predicted category
+    prediction_timestamp = Column(DateTime, nullable=True)  # When the prediction was made
     created_at = Column(DateTime, default=datetime.utcnow)
     modified_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))
@@ -41,6 +56,7 @@ class Document(Base):
     categories = relationship("Category", secondary=document_categories, back_populates="documents")
     logs = relationship("LogEntry", back_populates="document")
     notifications = relationship("Notification", back_populates="document")
+    feedback = relationship("Feedback", back_populates="document")
 
 class Category(Base):
     __tablename__ = "categories"
@@ -78,6 +94,22 @@ class Notification(Base):
 
     user = relationship("User", back_populates="notifications")
     document = relationship("Document", back_populates="notifications")
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    correct_category = Column(String, nullable=False)
+    original_category = Column(String, nullable=False)  # Store the original prediction
+    confidence_score = Column(Float, nullable=True)  # AI's confidence in original prediction
+    comment = Column(String, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    processed = Column(Boolean, default=False)  # Track if feedback has been used for retraining
+
+    document = relationship("Document", back_populates="feedback")
+    user = relationship("User", back_populates="feedback")
 
 class Folder(Base):
     __tablename__ = "folders"
