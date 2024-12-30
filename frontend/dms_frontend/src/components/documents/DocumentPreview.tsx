@@ -1,7 +1,9 @@
 import React from 'react';
 import { Document } from '../../services/drive';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { FileText, Download, ExternalLink } from 'lucide-react';
+import { CategoryBadge } from '@/components/categories/CategoryBadge';
+import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 
 interface DocumentPreviewProps {
   document: Document;
@@ -25,7 +27,15 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, onCl
           </Button>
         </div>
         
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 space-y-4">
+          {document.categories.length > 0 && (
+            <div className="flex flex-wrap gap-2 pb-4">
+              {document.categories.map((category) => (
+                <CategoryBadge key={category.id} category={category} />
+              ))}
+            </div>
+          )}
+          
           {isPreviewable ? (
             <iframe
               src={`https://drive.google.com/file/d/${document.google_drive_id}/preview`}
@@ -40,6 +50,18 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, onCl
           )}
         </div>
 
+        {document.categories.length > 0 && (
+          <div className="p-4 border-t border-b">
+            <FeedbackForm
+              documentId={document.id}
+              currentCategory={document.categories[0].name}
+              onFeedbackSubmitted={() => {
+                // Optionally refresh document data after feedback
+              }}
+            />
+          </div>
+        )}
+        
         <div className="p-4 border-t flex justify-end space-x-2">
           <Button
             variant="outline"
