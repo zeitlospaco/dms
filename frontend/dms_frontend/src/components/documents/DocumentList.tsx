@@ -2,16 +2,17 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Document } from '@/services/drive';
 import { driveService } from '@/services/drive';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { FileText, Trash2, MoveRight } from 'lucide-react';
 
 interface DocumentListProps {
   folderId?: number;
   categoryId?: number;
   searchQuery?: string;
+  onDocumentClick?: (document: Document) => void;
 }
 
-export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId, searchQuery }) => {
+export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId, searchQuery, onDocumentClick }) => {
   const { data: documents, isLoading } = useQuery({
     queryKey: ['documents', folderId, categoryId, searchQuery],
     queryFn: () => driveService.searchDocuments(searchQuery || '', categoryId, folderId),
@@ -45,9 +46,9 @@ export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open(`https://drive.google.com/file/d/${doc.google_drive_id}`)}
+              onClick={() => onDocumentClick?.(doc)}
             >
-              View
+              Preview
             </Button>
             <Button
               variant="ghost"

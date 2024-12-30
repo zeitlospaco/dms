@@ -1,6 +1,6 @@
 import React from 'react';
-import { Document } from '@/services/drive';
-import { Button } from '@/components/ui/Button';
+import { Document } from '../../services/drive';
+import { Button } from '../ui/button';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 
 interface DocumentPreviewProps {
