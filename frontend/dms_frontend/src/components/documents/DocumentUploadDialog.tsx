@@ -72,8 +72,8 @@ export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUplo
   };
 
   return (
-    <div className={`fixed inset-0 bg-black/50 ${isOpen ? 'block' : 'hidden'}`}>
-      <div className="fixed inset-x-0 top-1/2 -translate-y-1/2 max-w-lg mx-auto p-6 bg-white rounded-lg shadow-xl">
+    <div className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`fixed inset-x-0 top-1/2 -translate-y-1/2 max-w-lg mx-auto p-6 bg-white/95 rounded-lg shadow-xl transition-all duration-300 transform ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
         <h3 className="text-lg font-medium mb-4">Upload Document</h3>
         
         <div className="space-y-4">

@@ -24,7 +24,7 @@ const FolderNode: React.FC<FolderNodeProps> = ({ folder, level, onFolderSelect, 
     <div className="select-none">
       <div
         className={cn(
-          'flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100',
+          'flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-200',
           isSelected && 'bg-primary/10'
         )}
         style={{ paddingLeft: `${level * 1.5}rem` }}
@@ -36,7 +36,7 @@ const FolderNode: React.FC<FolderNodeProps> = ({ folder, level, onFolderSelect, 
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="p-1 hover:bg-gray-200 rounded-md"
+            className="p-1 hover:bg-gray-200 rounded-md transition-colors duration-200"
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
@@ -74,7 +74,18 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onFolderSelect, selected
   });
 
   if (isLoading) {
-    return <div className="p-4">Loading folders...</div>;
+    return (
+      <div className="p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!folders?.length) {
@@ -82,8 +93,8 @@ export const FolderTree: React.FC<FolderTreeProps> = ({ onFolderSelect, selected
   }
 
   return (
-    <div className="p-2">
-      <h3 className="text-sm font-medium mb-3">Folders</h3>
+    <div className="p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm transition-all duration-300 hover:shadow-md">
+      <h3 className="text-sm font-medium mb-3 text-gray-900">Folders</h3>
       {folders.map((folder) => (
         <FolderNode
           key={folder.id}

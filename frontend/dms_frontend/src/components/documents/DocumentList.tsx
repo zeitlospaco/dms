@@ -19,7 +19,20 @@ export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId
   });
 
   if (isLoading) {
-    return <div className="flex justify-center p-4">Loading documents...</div>;
+    return (
+      <div className="flex justify-center p-4">
+        <div className="animate-pulse flex space-x-4">
+          <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+          <div className="flex-1 space-y-4 py-1">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!documents?.length) {
@@ -27,11 +40,11 @@ export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId
   }
 
   return (
-    <div className="divide-y">
+    <div className="divide-y divide-gray-100">
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className="p-4 hover:bg-gray-50 cursor-pointer"
+          className="p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
           onClick={() => onDocumentClick?.(doc)}
         >
           <div className="flex items-start justify-between">
@@ -39,7 +52,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId
               <h3 className="text-sm font-medium">{doc.filename}</h3>
               <div className="mt-1 flex items-center gap-2">
                 {doc.topic_label && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full transition-colors duration-200 hover:bg-blue-200">
                     {doc.topic_label}
                   </span>
                 )}

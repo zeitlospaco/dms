@@ -34,14 +34,14 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow">
-          <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <header className="sticky top-0 bg-white/80 backdrop-blur-sm shadow-sm z-50 transition-all duration-300">
+          <div className="mx-auto max-w-7xl px-4 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">Document Management System</h1>
+              <h1 className="text-3xl font-bold text-gray-900 transition-colors">Document Management System</h1>
               <button
                 onClick={() => setIsUploadDialogOpen(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 hover:shadow-lg"
               >
                 Upload Document
               </button>
