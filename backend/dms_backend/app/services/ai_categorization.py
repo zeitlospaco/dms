@@ -1,7 +1,4 @@
 from typing import List, Optional, Tuple
-from google.cloud import vision, language_v1
-from google.cloud.vision_v1 import types
-import io
 import os
 import json
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -14,14 +11,16 @@ from datetime import datetime
 from sqlalchemy.orm import Session, sessionmaker
 from ..models import Feedback, Document, Base, ModelMetrics
 from ..database import engine
+import PyPDF2
+import io
+from PIL import Image
+import pytesseract
 
 class AICategorization:
     """Service for AI-based document categorization using Google Cloud APIs"""
     
     def __init__(self, model_path: Optional[str] = None, version: Optional[str] = None):
         """Initialize the AI categorization service"""
-        self.vision_client = vision.ImageAnnotatorClient()
-        self.language_client = language_v1.LanguageServiceClient()
         self.version = version or datetime.now().strftime("%Y%m%d_%H%M%S")
         self.model_dir = "models"
         self.model_path = model_path or os.path.join(self.model_dir, f'document_classifier_{self.version}.joblib')
@@ -40,34 +39,66 @@ class AICategorization:
             ])
     
     def extract_text(self, content: bytes) -> str:
-        """Extract text from document using Google Cloud Vision API"""
-        image = types.Image(content=content)
-        response = self.vision_client.document_text_detection(image=image)
-        
-        if response.error.message:
-            raise Exception(
-                f'{response.error.message}\nFor more info on error messages, check: '
-                'https://cloud.google.com/apis/design/errors'
-            )
-        
-        return response.full_text_annotation.text
+        """Extract text from document using PyPDF2 for PDFs and Tesseract for images"""
+        try:
+            # Try to read as PDF first
+            pdf_file = io.BytesIO(content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+            return text.strip()
+        except:
+            try:
+                # If not PDF, try to read as image
+                image = Image.open(io.BytesIO(content))
+                return pytesseract.image_to_string(image)
+            except:
+                # If both fail, return filename or empty string
+                return ""
     
     def analyze_entities(self, text: str) -> List[dict]:
-        """Analyze entities in text using Google Cloud Natural Language API"""
-        document = language_v1.Document(
-            content=text,
-            type_=language_v1.Document.Type.PLAIN_TEXT
-        )
+        """Basic entity analysis using keyword matching and patterns"""
+        entities = []
         
-        response = self.language_client.analyze_entities(
-            request={'document': document}
-        )
+        # Extract potential dates using simple pattern matching
+        import re
+        date_patterns = [
+            r'\d{4}-\d{2}-\d{2}',  # YYYY-MM-DD
+            r'\d{2}/\d{2}/\d{4}',  # MM/DD/YYYY
+            r'\d{2}\.\d{2}\.\d{4}'  # DD.MM.YYYY
+        ]
         
-        return [{
-            'name': entity.name,
-            'type': language_v1.Entity.Type(entity.type_).name,
-            'salience': entity.salience
-        } for entity in response.entities]
+        for pattern in date_patterns:
+            matches = re.finditer(pattern, text)
+            for match in matches:
+                entities.append({
+                    'name': match.group(),
+                    'type': 'DATE',
+                    'salience': 1.0
+                })
+        
+        # Extract monetary amounts
+        money_pattern = r'\$\d+(?:\.\d{2})?'
+        matches = re.finditer(money_pattern, text)
+        for match in matches:
+            entities.append({
+                'name': match.group(),
+                'type': 'PRICE',
+                'salience': 0.8
+            })
+        
+        # Extract email addresses
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        matches = re.finditer(email_pattern, text)
+        for match in matches:
+            entities.append({
+                'name': match.group(),
+                'type': 'EMAIL',
+                'salience': 0.9
+            })
+        
+        return entities
     
     def classify_document(self, text: str, category: Optional[str] = None) -> Tuple[str, float]:
         """Classify document text and optionally train the model"""

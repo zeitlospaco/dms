@@ -1,13 +1,17 @@
 import React from 'react';
 import { SmartSearch } from '../insights/SmartSearch';
+import { driveService } from '@/services/drive';
+import { useToast } from '@/hooks/use-toast';
 
 interface DocumentUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (file: File) => void;
+  folderId?: number;
+  onUploadComplete: () => void;
+  className?: string;
 }
 
-export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUploadDialogProps) {
+export function DocumentUploadDialog({ isOpen, onClose, folderId, onUploadComplete, className }: DocumentUploadDialogProps) {
   const [suggestions] = React.useState<string[]>([
     'Invoice from Company XYZ',
     'Contract Agreement',
@@ -18,6 +22,8 @@ export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUplo
   const [error, setError] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const { toast } = useToast();
+  
   const handleUpload = async () => {
     if (!selectedFile) {
       setError('Please select a file first');
@@ -27,28 +33,37 @@ export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUplo
     setIsUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('enable_workflow', 'true');
-
     try {
-      const response = await fetch(
-        'https://document-management-app-jbey7enb.devinapps.com/api/documents/upload',
-        {
-          method: 'POST',
-          body: formData,
-        }
+      const uncategorizedFolderId = import.meta.env.VITE_UNCATEGORIZED_FOLDER_ID;
+      const response = await driveService.uploadDocument(
+        selectedFile,
+        folderId || parseInt(uncategorizedFolderId)
       );
 
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
+      console.log('Upload response:', response);
+      
+      if (response.ai_processing?.category_suggestion) {
+        toast({
+          title: 'Document categorized',
+          description: `Suggested category: ${response.ai_processing.category_suggestion}`,
+        });
       }
 
-      const data = await response.json();
-      onUpload(selectedFile);
+      toast({
+        title: 'Upload successful',
+        description: `${selectedFile.name} has been uploaded successfully.`,
+      });
+
+      onUploadComplete();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error uploading file');
+      const errorMessage = err instanceof Error ? err.message : 'Error uploading file';
+      setError(errorMessage);
+      toast({
+        title: 'Upload failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setIsUploading(false);
     }
@@ -72,16 +87,23 @@ export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUplo
   };
 
   return (
-    <div className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+    <div className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${className || ''}`}>
       <div className={`fixed inset-x-0 top-1/2 -translate-y-1/2 max-w-lg mx-auto p-6 bg-white/95 rounded-lg shadow-xl transition-all duration-300 transform ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
         <h3 className="text-lg font-medium mb-4">Upload Document</h3>
         
         <div className="space-y-4">
           <SmartSearch
-            value=""
+            value={selectedFile?.name || ''}
             onChange={() => {}}
             suggestions={suggestions}
-            onSuggestionClick={() => {}}
+            onSuggestionClick={(_suggestion) => {
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+              setSelectedFile(null);
+              setError(null);
+            }}
+            className="mb-4"
           />
           
           <div

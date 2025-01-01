@@ -1,7 +1,6 @@
-import React from 'react';
 import { searchService } from '../../services/search';
 import { useQuery } from '@tanstack/react-query';
-import { Document } from '../../services/drive';
+import { Document } from '@/services/drive';
 
 interface RelatedDocument {
   document: Document;

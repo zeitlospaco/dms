@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface DocumentSummaryProps {
   summary: string | null;
   sentiment: {

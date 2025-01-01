@@ -9,25 +9,30 @@ document_categories = Table('document_categories', Base.metadata,
     Column('category_id', Integer, ForeignKey('categories.id'))
 )
 
-# Association table for model performance tracking
-model_metrics = Table('model_metrics', Base.metadata,
-    Column('id', Integer, primary_key=True),
-    Column('timestamp', DateTime, default=datetime.utcnow),
-    Column('accuracy', Float),
-    Column('precision', Float),
-    Column('recall', Float),
-    Column('f1_score', Float),
-    Column('training_size', Integer),
-    Column('validation_size', Integer)
-)
+# Model metrics class for tracking AI performance
+class ModelMetrics(Base):
+    __tablename__ = "model_metrics"
+
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    accuracy = Column(Float)
+    precision = Column(Float)
+    recall = Column(Float)
+    f1_score = Column(Float)
+    training_size = Column(Integer)
+    validation_size = Column(Integer)
+    model_type = Column(String)  # Type of model (e.g., "categorization", "search")
+    notes = Column(String, nullable=True)  # Additional information about the metrics
 
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    role = Column(String)  # admin or user
+    hashed_password = Column(String, nullable=True)  # Optional for OAuth users
+    credentials = Column(JSON, nullable=True)  # Store Google OAuth credentials
+    is_admin = Column(Boolean, default=False)
+    last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     documents = relationship("Document", back_populates="owner")
     logs = relationship("LogEntry", back_populates="user")

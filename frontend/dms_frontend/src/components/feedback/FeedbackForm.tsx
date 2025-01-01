@@ -45,7 +45,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({
       onFeedbackSubmitted?.();
       setIsCorrect(null);
       setSelectedCategoryId(undefined);
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to submit feedback. Please try again.',

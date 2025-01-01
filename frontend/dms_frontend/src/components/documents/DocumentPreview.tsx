@@ -1,11 +1,16 @@
 import React from 'react';
-import { Document } from '../../services/drive';
-import { Button } from '@/components/ui/button';
+import { Document } from '../../types/document';
+import { Button } from '../ui/button';
 import { FileText, Download, ExternalLink } from 'lucide-react';
-import { CategoryBadge } from '@/components/categories/CategoryBadge';
-import { FeedbackForm } from '@/components/feedback/FeedbackForm';
+import { CategoryBadge } from '../categories/CategoryBadge';
+import { FeedbackForm } from '../feedback/FeedbackForm';
+import { DocumentTag } from '../../services/workflow';
+
 import { DocumentSummary } from '../insights/DocumentSummary';
 import { DocumentTimeline } from '../collaboration/DocumentTimeline';
+import { DocumentVersionComparison } from '../collaboration/DocumentVersionComparison';
+import { RelatedDocuments } from '../insights/RelatedDocuments';
+import { SmartTags } from '../collaboration/SmartTags';
 
 interface DocumentPreviewProps {
   document: Document;
@@ -16,26 +21,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, onCl
   const isPreviewable = document.mime_type.startsWith('image/') || 
                        document.mime_type === 'application/pdf';
 
-  const timelineEvents = [
-    {
-      id: 'created',
-      type: 'created' as const,
-      date: new Date(document.created_at),
-      description: 'Document created'
-    },
-    {
-      id: 'updated',
-      type: 'modified' as const,
-      date: new Date(document.updated_at),
-      description: 'Last modified'
-    },
-    ...(document.deadline_date ? [{
-      id: 'deadline',
-      type: 'deadline' as const,
-      date: new Date(document.deadline_date),
-      description: 'Deadline'
-    }] : [])
-  ];
+  // Timeline events are now handled by the DocumentTimeline component
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
@@ -54,26 +40,47 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, onCl
           {document.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 pb-4">
               {document.categories.map((category) => (
-                <CategoryBadge key={category.id} category={category} />
+                <CategoryBadge key={category.id} category={{ ...category, id: category.id.toString() }} />
               ))}
             </div>
           )}
           
           {/* Document Summary and Analysis */}
           <DocumentSummary
-            summary={document.summary_text}
+            summary={document.summary_text || null}
             sentiment={{
-              label: document.sentiment_label,
-              score: document.sentiment_score
+              label: document.sentiment_label || null,
+              score: document.sentiment_score || null
             }}
             topics={{
-              label: document.topic_label,
-              confidence: document.topic_confidence
+              label: document.topic_label || null,
+              confidence: document.topic_confidence || null
             }}
           />
 
           {/* Document Timeline */}
-          <DocumentTimeline events={timelineEvents} />
+          <DocumentTimeline document={document} />
+          
+          {/* Document Version Comparison */}
+          <DocumentVersionComparison document={document} />
+          
+          {/* Related Documents */}
+          <RelatedDocuments 
+            documentId={String(document.id)}
+            onDocumentSelect={(id) => {
+              console.log('Selected related document:', id);
+              // TODO: Implement document selection logic
+            }}
+          />
+          
+          {/* Smart Tags */}
+          <SmartTags
+            document={document}
+            onTagClick={(tag: DocumentTag) => {
+              console.log('Tag clicked:', tag);
+              // TODO: Implement tag click logic
+            }}
+          />
           
           {/* Document Preview */}
           {isPreviewable ? (

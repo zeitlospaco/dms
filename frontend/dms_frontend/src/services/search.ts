@@ -3,7 +3,7 @@ import { Document } from './drive';
 
 export interface SearchSuggestion {
   text: string;
-  type: 'category' | 'term' | 'document';
+  type: 'category' | 'term' | 'document' | 'external';
   confidence: number;
   document_id?: string;
 }

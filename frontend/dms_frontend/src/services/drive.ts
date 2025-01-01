@@ -12,6 +12,10 @@ export interface Document {
   categories: Category[];
   created_at: string;
   updated_at: string;
+  topic_label?: string;
+  sentiment_label?: 'positive' | 'negative' | 'neutral';
+  deadline_date?: string;
+  folder?: string;
 }
 
 export interface Folder {

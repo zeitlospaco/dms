@@ -32,4 +32,5 @@ async def periodic_model_training():
 
 async def start_model_trainer():
     """Start the periodic model training task"""
-    await periodic_model_training()
+    asyncio.create_task(periodic_model_training())
+    return {"status": "Model trainer started in background"}

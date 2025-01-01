@@ -1,8 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { driveService } from '@/services/drive';
+import { workflowService } from '@/services/workflow';
+import { useToast } from '@/hooks/use-toast';
 
 interface DocumentUploadProps {
   folderId?: number;
@@ -10,16 +12,47 @@ interface DocumentUploadProps {
 }
 
 export const DocumentUpload: React.FC<DocumentUploadProps> = ({ folderId, onUploadComplete }) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setIsUploading(true);
     try {
       for (const file of acceptedFiles) {
-        await driveService.uploadDocument(file, folderId);
+        // Upload document
+        const response = await driveService.uploadDocument(file, folderId);
+        const document = response.document;
+
+        // Process through workflow
+        await workflowService.processDocument(document.id);
+        
+        // Check for duplicates
+        const duplicates = await workflowService.getDuplicates(document.id);
+        if (duplicates.length > 0) {
+          toast({
+            title: 'Potential duplicates found',
+            description: `Found ${duplicates.length} similar document(s). Please review.`,
+            variant: 'destructive',
+          });
+        }
+
+        toast({
+          title: 'Document uploaded',
+          description: `${file.name} has been processed and categorized.`,
+        });
       }
       onUploadComplete?.();
     } catch (error) {
       console.error('Upload failed:', error);
+      toast({
+        title: 'Upload failed',
+        description: 'There was an error uploading your document.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
     }
-  }, [folderId, onUploadComplete]);
+  }, [folderId, onUploadComplete, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -39,8 +72,15 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ folderId, onUplo
           ? 'Drop the files here...'
           : 'Drag and drop files here, or click to select files'}
       </p>
-      <Button variant="outline" className="mt-4">
-        Select Files
+      <Button variant="outline" className="mt-4" disabled={isUploading}>
+        {isUploading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          'Select Files'
+        )}
       </Button>
     </div>
   );

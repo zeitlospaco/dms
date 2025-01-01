@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { Document } from '@/services/drive';
 import { driveService } from '@/services/drive';
 import { Button } from '@/components/ui/button';
-import { FileText, Trash2, MoveRight } from 'lucide-react';
+import { Trash2, MoveRight } from 'lucide-react';
+import { SmartTags } from '../collaboration/SmartTags';
+import { RelatedDocuments } from '../insights/RelatedDocuments';
 
 interface DocumentListProps {
   folderId?: number;
@@ -50,21 +52,14 @@ export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-sm font-medium">{doc.filename}</h3>
-              <div className="mt-1 flex items-center gap-2">
-                {doc.topic_label && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full transition-colors duration-200 hover:bg-blue-200">
-                    {doc.topic_label}
-                  </span>
-                )}
-                {doc.sentiment_label && (
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    doc.sentiment_label === 'positive' ? 'bg-green-100 text-green-800' :
-                    doc.sentiment_label === 'negative' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {doc.sentiment_label}
-                  </span>
-                )}
+              <div className="mt-1 space-y-2">
+                <SmartTags document={doc} />
+                <RelatedDocuments documentId={String(doc.id)} className="mt-2" onDocumentSelect={(id) => {
+                  const relatedDoc = documents.find(d => String(d.id) === id);
+                  if (relatedDoc) {
+                    onDocumentClick?.(relatedDoc);
+                  }
+                }} />
               </div>
             </div>
             <div className="flex items-center space-x-2">

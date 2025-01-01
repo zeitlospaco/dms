@@ -1,5 +1,5 @@
 import React from 'react';
-import { Category } from '@/services/drive';
+import { Category } from '../../types/category';
 
 interface CategoryBadgeProps {
   category: Category;

@@ -5,6 +5,7 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 from fastapi import HTTPException
+import google.auth.transport.requests
 import os
 import io
 
@@ -13,15 +14,36 @@ class GoogleDriveService:
     
     SCOPES = [
         'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive.metadata.readonly'
+        'https://www.googleapis.com/auth/drive.metadata.readonly',
+        'https://www.googleapis.com/auth/drive'
     ]
     
     def __init__(self, credentials: Optional[Credentials] = None):
         """Initialize the Google Drive service with optional credentials"""
+        if not credentials:
+            # Load credentials from environment variables
+            credentials = Credentials(
+                token=os.getenv('GOOGLE_ACCESS_TOKEN'),
+                refresh_token=os.getenv('GOOGLE_REFRESH_TOKEN'),
+                token_uri=os.getenv('GOOGLE_TOKEN_URI', 'https://oauth2.googleapis.com/token'),
+                client_id=os.getenv('GOOGLE_CLIENT_ID'),
+                client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+                scopes=[
+                    'https://www.googleapis.com/auth/drive.file',
+                    'https://www.googleapis.com/auth/drive.metadata.readonly',
+                    'https://www.googleapis.com/auth/drive'
+                ]
+            )
+        
         self.credentials = credentials
         self.service = None
-        if credentials:
-            self.service = build('drive', 'v3', credentials=credentials)
+        
+        # Check if token needs refresh
+        if credentials.expired and credentials.refresh_token:
+            request = google.auth.transport.requests.Request()
+            credentials.refresh(request)
+        
+        self.service = build('drive', 'v3', credentials=credentials)
     
     @classmethod
     def create_auth_url(cls) -> tuple[Flow, str]:
@@ -29,8 +51,8 @@ class GoogleDriveService:
         flow = Flow.from_client_config(
             {
                 "web": {
-                    "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
-                    "client_secret": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+                    "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+                    "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
                     "redirect_uri": os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
@@ -94,12 +116,31 @@ class GoogleDriveService:
         if not self.service:
             raise HTTPException(status_code=401, detail="Not authenticated")
             
-        query = f"'{folder_id}' in parents" if folder_id else None
+        query = []
+        if folder_id:
+            query.append(f"'{folder_id}' in parents")
+        query.append("mimeType != 'application/vnd.google-apps.folder'")
         
         results = self.service.files().list(
             pageSize=page_size,
-            q=query,
+            q=" and ".join(query),
             fields='files(id, name, size, createdTime, modifiedTime, mimeType)'
+        ).execute()
+        
+        return results.get('files', [])
+        
+    def list_folders(self, parent_id: Optional[str] = None) -> List[dict]:
+        """List folders in a parent folder"""
+        if not self.service:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+            
+        query = ["mimeType = 'application/vnd.google-apps.folder'"]
+        if parent_id:
+            query.append(f"'{parent_id}' in parents")
+            
+        results = self.service.files().list(
+            q=" and ".join(query),
+            fields='files(id, name, createdTime, modifiedTime)'
         ).execute()
         
         return results.get('files', [])

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 import json
+import os
 from typing import Optional
 from datetime import datetime, timedelta
 
@@ -46,23 +47,28 @@ async def oauth_callback(
         'scopes': credentials.scopes
     }
     
-    # Here you would typically get the user's email from Google's userinfo endpoint
-    # and create/update the user record
-    # For now, we'll use a placeholder
-    user = db.query(User).first()  # In reality, query by email
+    # Create or update user with credentials
+    user = db.query(User).first()
     if not user:
         user = User(
-            email="placeholder@example.com",
-            credentials=json.dumps(creds_dict)
+            email="admin@example.com",  # Default admin user
+            credentials=json.dumps(creds_dict),
+            is_admin=True
         )
         db.add(user)
     else:
         user.credentials = json.dumps(creds_dict)
+        user.last_login = datetime.utcnow()
     
     db.commit()
     
-    # Redirect to frontend
-    return RedirectResponse(url="/dashboard")
+    # Return credentials to frontend
+    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+    token = credentials.token
+    # Create a simple token parameter to avoid URL encoding issues
+    return RedirectResponse(
+        url=f"{frontend_url}?token={token}"
+    )
 
 @router.get("/refresh")
 async def refresh_token(
