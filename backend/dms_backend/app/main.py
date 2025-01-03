@@ -18,7 +18,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="DMS API", on_startup=[start_model_trainer])
 
 # Configure CORS
-origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173").split(",")
+origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,https://document-management-app-jbey7enb.devinapps.com").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
