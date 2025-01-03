@@ -5,7 +5,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/',  // Use root path for production assets
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -14,7 +14,6 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
   },
-  publicDir: 'public',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -22,14 +21,16 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
+        main: path.resolve(__dirname, 'src/main.tsx'),
       },
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
-        entryFileNames: '[name].[hash].js',
-        chunkFileNames: 'chunks/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/chunks/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]'
       },
     },
