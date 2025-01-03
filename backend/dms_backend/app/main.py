@@ -15,7 +15,7 @@ from app.services.model_trainer import start_model_trainer
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="DMS API", on_startup=[start_model_trainer])
+app = FastAPI(title="DMS API")
 
 # Configure CORS
 origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,https://document-management-app-jbey7enb.devinapps.com").split(",")
