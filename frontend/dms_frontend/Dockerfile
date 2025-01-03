@@ -16,11 +16,11 @@ RUN pnpm install
 COPY . .
 
 # Set build-time environment variables
-ARG VITE_API_URL
+ARG VITE_API_URL=https://app-frgtiqwl.fly.dev
 ARG VITE_GOOGLE_OAUTH_CLIENT_ID
 ARG VITE_GOOGLE_API_KEY
 
-ENV VITE_API_URL=${VITE_API_URL:-https://app-frgtiqwl-blue-grass-9650.fly.dev}
+ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_GOOGLE_OAUTH_CLIENT_ID=${VITE_GOOGLE_OAUTH_CLIENT_ID}
 ENV VITE_GOOGLE_API_KEY=${VITE_GOOGLE_API_KEY}
 
