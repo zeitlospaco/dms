@@ -5,7 +5,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './',  // Base URL for production - relative paths
+  base: '/',  // Base URL for production - absolute paths
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -14,6 +14,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
   },
+  publicDir: 'public',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
