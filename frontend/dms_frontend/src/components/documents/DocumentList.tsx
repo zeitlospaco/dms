@@ -1,9 +1,8 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Document } from '@/services/drive';
+import { Document } from '@/types/document';
 import { driveService } from '@/services/drive';
 import { Button } from '@/components/ui/button';
-import { FileText, Trash2, MoveRight } from 'lucide-react';
+import { Trash2, MoveRight } from 'lucide-react';
 
 interface DocumentListProps {
   folderId?: number;

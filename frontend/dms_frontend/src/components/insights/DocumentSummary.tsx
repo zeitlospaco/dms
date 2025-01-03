@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 
 interface DocumentSummaryProps {
   summary: string | null;

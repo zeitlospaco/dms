@@ -1,21 +1,21 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 export function Login() {
-  const navigate = useNavigate();
+  const history = useHistory();
 
   useEffect(() => {
     // Check if we have an auth token
     const token = localStorage.getItem('auth_token');
     if (token) {
-      navigate('/');
+      history.push('/');
       return;
     }
 
     // Redirect to backend auth endpoint
     const backendUrl = import.meta.env.VITE_API_URL;
     window.location.href = `${backendUrl}/auth/login`;
-  }, [navigate]);
+  }, [history]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
