@@ -14,7 +14,7 @@ export function Login() {
 
     // Start Google OAuth flow
     const backendUrl = import.meta.env.VITE_API_URL || 'https://app-frgtiqwl-blue-grass-9650.fly.dev';
-    const loginUrl = `${backendUrl}/api/v1/auth/google/url`;
+    const loginUrl = `${backendUrl}/api/v1/auth/login`;
     
     fetch(loginUrl)
       .then(response => response.json())
