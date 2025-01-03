@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Switch, Route, Redirect } from 'react-router-dom';
+import { Login } from './components/auth/Login';
 import { DocumentList } from './components/documents/DocumentList';
 import { DocumentUploadDialog } from './components/documents/DocumentUploadDialog';
 import { DocumentPreview } from './components/documents/DocumentPreview';
@@ -32,8 +34,16 @@ function App() {
     }
   };
 
+  const isAuthenticated = !!localStorage.getItem('auth_token');
+
   return (
     <QueryClientProvider client={queryClient}>
+      <Switch>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route path="/">
+          {isAuthenticated ? (
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 py-6">
@@ -117,6 +127,11 @@ function App() {
           onUploadComplete={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}
         />
       </div>
+            ) : (
+              <Redirect to="/login" />
+            )}
+        </Route>
+      </Switch>
     </QueryClientProvider>
   );
 }
