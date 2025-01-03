@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Document } from '@/types/document';
+import type { Document } from '@/types/document';
 import { driveService } from '@/services/drive';
 import { Button } from '@/components/ui/button';
 import { Trash2, MoveRight } from 'lucide-react';
@@ -37,12 +37,12 @@ export const DocumentList: React.FC<DocumentListProps> = ({ folderId, categoryId
             <div>
               <h3 className="text-sm font-medium">{doc.filename}</h3>
               <div className="mt-1 flex items-center gap-2">
-                {doc.topic_label && (
+                {doc?.topic_label && (
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
                     {doc.topic_label}
                   </span>
                 )}
-                {doc.sentiment_label && (
+                {doc?.sentiment_label && (
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     doc.sentiment_label === 'positive' ? 'bg-green-100 text-green-800' :
                     doc.sentiment_label === 'negative' ? 'bg-red-100 text-red-800' :

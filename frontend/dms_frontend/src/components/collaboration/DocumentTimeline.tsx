@@ -1,5 +1,3 @@
-import { type ReactNode } from 'react';
-
 interface TimelineEvent {
   id: string;
   type: 'created' | 'modified' | 'deadline';
