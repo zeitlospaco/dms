@@ -86,6 +86,8 @@ async def sync_drive_changes(resource_id: str, db: Session):
         print(f"Error syncing drive changes: {str(e)}")
 
 # Health check endpoint
-@app.get("/healthz")
+@app.get("/api/v1/healthz")
 async def healthz():
-    return {"status": "healthy"}
+    """Health check endpoint for monitoring service status"""
+    from datetime import datetime
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
