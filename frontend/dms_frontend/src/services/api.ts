@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://app-frgtiqwl-blue-grass-9650.fly.dev';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://document-management-app-jbey7enb.fly.dev';
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
