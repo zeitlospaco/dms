@@ -18,7 +18,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="DMS API")
 
 # Configure CORS
-origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,https://document-management-app-jbey7enb.devinapps.com").split(",")
+origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,https://document-management-app-jbey7enb.fly.dev").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -27,14 +27,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(documents.router)
-app.include_router(categories.router)
-app.include_router(logs.router)
-app.include_router(notifications.router)
-app.include_router(optimization.router)
-app.include_router(feedback.router)
+# Include routers with API prefix
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(documents.router, prefix="/api/v1")
+app.include_router(categories.router, prefix="/api/v1")
+app.include_router(logs.router, prefix="/api/v1")
+app.include_router(notifications.router, prefix="/api/v1")
+app.include_router(optimization.router, prefix="/api/v1")
+app.include_router(feedback.router, prefix="/api/v1")
 
 # Webhook endpoint for Google Drive Push Notifications
 @app.post("/webhook/drive")

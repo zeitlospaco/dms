@@ -12,9 +12,20 @@ export function Login() {
       return;
     }
 
-    // Redirect to backend auth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL;
-    window.location.href = `${backendUrl}/auth/login`;
+    // Start Google OAuth flow
+    const backendUrl = import.meta.env.VITE_API_URL || 'https://app-frgtiqwl-blue-grass-9650.fly.dev';
+    const loginUrl = `${backendUrl}/api/v1/auth/google/url`;
+    
+    fetch(loginUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.auth_url) {
+          window.location.href = data.auth_url;
+        }
+      })
+      .catch(error => {
+        console.error('Failed to get auth URL:', error);
+      });
   }, [history]);
 
   return (
