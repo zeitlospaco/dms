@@ -18,7 +18,12 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="DMS API")
 
 # Configure CORS
-origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,https://document-management-app-jbey7enb.fly.dev,https://document-management-app-jbey7enb.devinapps.com").split(",")
+origins = [
+    "http://localhost:5173",
+    "https://document-management-app-jbey7enb.fly.dev",
+    "https://document-management-app-jbey7enb.devinapps.com",
+    "https://document-management-app-jbey7enb.devinapps.com/"
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -26,6 +31,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
+    allow_origin_regex="https://.*\.devinapps\.com"
 )
 
 # Include routers with API prefix
@@ -86,7 +92,8 @@ async def sync_drive_changes(resource_id: str, db: Session):
         # Log error and handle appropriately
         print(f"Error syncing drive changes: {str(e)}")
 
-# Health check endpoint
+# Health check endpoints
+@app.get("/healthz")
 @app.get("/api/v1/healthz")
 async def healthz():
     """Health check endpoint for monitoring service status"""
