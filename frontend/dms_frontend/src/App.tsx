@@ -6,7 +6,7 @@ import { DocumentPreview } from './components/documents/DocumentPreview';
 import { FolderTree } from './components/folders/FolderTree';
 import { CategorySelect } from './components/categories/CategorySelect';
 import { SmartSearch } from './components/insights/SmartSearch';
-import { Document } from './services/drive';
+import type { Document } from '@/types/document';
 
 const queryClient = new QueryClient();
 
