@@ -5,9 +5,11 @@ interface DocumentUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onUpload: (file: File) => void;
+  folderId?: number;
+  onUploadComplete: () => Promise<void>;
 }
 
-export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUploadDialogProps) {
+export function DocumentUploadDialog({ isOpen, onClose, onUpload, folderId, onUploadComplete }: DocumentUploadDialogProps) {
   const [suggestions] = React.useState<string[]>([
     'Invoice from Company XYZ',
     'Contract Agreement',
@@ -33,7 +35,7 @@ export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUplo
 
     try {
       const response = await fetch(
-        'https://document-management-app-jbey7enb.devinapps.com/api/documents/upload',
+        `https://document-management-app-jbey7enb.devinapps.com/api/documents/upload${folderId ? `?folderId=${folderId}` : ''}`,
         {
           method: 'POST',
           body: formData,
@@ -44,8 +46,9 @@ export function DocumentUploadDialog({ isOpen, onClose, onUpload }: DocumentUplo
         throw new Error(`Upload failed: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      await response.json();
       onUpload(selectedFile);
+      await onUploadComplete();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error uploading file');

@@ -1,18 +1,5 @@
 import api from './api';
-
-export interface Document {
-  id: number;
-  filename: string;
-  google_drive_id: string;
-  mime_type: string;
-  size_bytes: number;
-  folder_id?: number;
-  extracted_text?: string;
-  confidence_score?: number;
-  categories: Category[];
-  created_at: string;
-  updated_at: string;
-}
+import type { Document } from '@/types/document';
 
 export interface Folder {
   id: number;

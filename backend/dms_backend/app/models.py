@@ -9,17 +9,18 @@ document_categories = Table('document_categories', Base.metadata,
     Column('category_id', Integer, ForeignKey('categories.id'))
 )
 
-# Association table for model performance tracking
-model_metrics = Table('model_metrics', Base.metadata,
-    Column('id', Integer, primary_key=True),
-    Column('timestamp', DateTime, default=datetime.utcnow),
-    Column('accuracy', Float),
-    Column('precision', Float),
-    Column('recall', Float),
-    Column('f1_score', Float),
-    Column('training_size', Integer),
-    Column('validation_size', Integer)
-)
+# Model for tracking ML model performance
+class ModelMetrics(Base):
+    __tablename__ = "model_metrics"
+
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    accuracy = Column(Float)
+    precision = Column(Float)
+    recall = Column(Float)
+    f1_score = Column(Float)
+    training_size = Column(Integer)
+    validation_size = Column(Integer)
 
 class User(Base):
     __tablename__ = "users"

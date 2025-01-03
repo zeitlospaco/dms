@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document } from '../../services/drive';
+import { Document } from '@/types/document';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 import { CategoryBadge } from '@/components/categories/CategoryBadge';

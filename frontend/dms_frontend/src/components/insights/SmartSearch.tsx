@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from '../ui/Input';
+import { Input } from '../ui/input';
 
 interface SmartSearchProps {
   value: string;
@@ -20,7 +20,7 @@ export function SmartSearch({
         type="text"
         placeholder="Search documents..."
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         className="w-full"
       />
       

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 import json
+import os
 from typing import Optional
 from datetime import datetime, timedelta
 
@@ -61,8 +62,9 @@ async def oauth_callback(
     
     db.commit()
     
-    # Redirect to frontend
-    return RedirectResponse(url="/dashboard")
+    # Redirect to frontend with token
+    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.fly.dev")
+    return RedirectResponse(url=f"{frontend_url}/dashboard")
 
 @router.get("/refresh")
 async def refresh_token(
