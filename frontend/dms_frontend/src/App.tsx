@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DocumentList } from './components/documents/DocumentList';
 import { DocumentUploadDialog } from './components/documents/DocumentUploadDialog';
@@ -113,6 +113,7 @@ function App() {
           isOpen={isUploadDialogOpen}
           onClose={() => setIsUploadDialogOpen(false)}
           folderId={selectedFolderId}
+          onUpload={(file) => console.log('File uploaded:', file)}
           onUploadComplete={() => queryClient.invalidateQueries({ queryKey: ['documents'] })}
         />
       </div>
