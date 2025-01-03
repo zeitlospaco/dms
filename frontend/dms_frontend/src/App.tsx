@@ -8,6 +8,7 @@ import { DocumentPreview } from './components/documents/DocumentPreview';
 import { FolderTree } from './components/folders/FolderTree';
 import { CategorySelect } from './components/categories/CategorySelect';
 import { SmartSearch } from './components/insights/SmartSearch';
+import { HealthCheck } from './components/HealthCheck';
 import type { Document } from '@/types/document';
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ function App() {
               </button>
             </div>
           </div>
+          <HealthCheck />
         </header>
 
         <main className="mx-auto max-w-7xl px-4 py-6">
