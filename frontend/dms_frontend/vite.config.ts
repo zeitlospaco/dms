@@ -20,9 +20,6 @@ export default defineConfig({
     sourcemap: true,
     manifest: true,
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'src/main.tsx'),
-      },
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
