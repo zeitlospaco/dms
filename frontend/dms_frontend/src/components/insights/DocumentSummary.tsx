@@ -1,19 +1,17 @@
-import type { FC } from 'react';
-
 interface DocumentSummaryProps {
-  summary: string | null;
+  summary?: string;
   sentiment: {
-    label: string | null;
-    score: number | null;
+    label?: string;
+    score?: number;
   };
   topics: {
-    label: string | null;
-    confidence: number | null;
+    label?: string;
+    confidence?: number;
   };
 }
 
 export function DocumentSummary({ summary, sentiment, topics }: DocumentSummaryProps) {
-  if (!summary && !sentiment.label && !topics.label) {
+  if (!summary && !sentiment?.label && !topics?.label) {
     return null;
   }
 
@@ -26,7 +24,7 @@ export function DocumentSummary({ summary, sentiment, topics }: DocumentSummaryP
         </div>
       )}
       
-      {sentiment.label && (
+      {sentiment?.label && (
         <div>
           <h4 className="text-sm font-medium mb-2">Sentiment</h4>
           <div className="flex items-center gap-2">
@@ -37,7 +35,7 @@ export function DocumentSummary({ summary, sentiment, topics }: DocumentSummaryP
             }`}>
               {sentiment.label}
             </span>
-            {sentiment.score !== null && (
+            {sentiment.score && (
               <span className="text-xs text-gray-500">
                 {(sentiment.score * 100).toFixed(0)}%
               </span>
@@ -46,14 +44,14 @@ export function DocumentSummary({ summary, sentiment, topics }: DocumentSummaryP
         </div>
       )}
 
-      {topics.label && (
+      {topics?.label && (
         <div>
           <h4 className="text-sm font-medium mb-2">Main Topic</h4>
           <div className="flex items-center gap-2">
             <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
               {topics.label}
             </span>
-            {topics.confidence !== null && (
+            {topics.confidence && (
               <span className="text-xs text-gray-500">
                 {(topics.confidence * 100).toFixed(0)}%
               </span>
