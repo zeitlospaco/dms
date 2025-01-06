@@ -23,13 +23,16 @@ origins = [
     "https://document-management-app-jbey7enb.devinapps.com",
     "https://app-frgtiqwl-blue-grass-9650.fly.dev"
 ]
+
+# Add CORS middleware before including routers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"]
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+    expose_headers=["Content-Length"],
+    max_age=600
 )
 
 # Include routers with API prefix
