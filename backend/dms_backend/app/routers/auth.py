@@ -12,14 +12,35 @@ from app.database import get_db
 from app.services.google_drive import GoogleDriveService
 from app.models import User
 
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+@router.options("/login")
+async def login_options():
+    """Handle preflight request for login endpoint"""
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "https://document-management-app-jbey7enb.devinapps.com",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+            "Access-Control-Max-Age": "600",
+        },
+    )
 
 @router.get("/login")
 async def login():
     """Start OAuth2 login flow"""
     flow, auth_url = GoogleDriveService.create_auth_url()
-    return {"auth_url": auth_url}
+    return JSONResponse(
+        content={"auth_url": auth_url},
+        headers={
+            "Access-Control-Allow-Origin": "https://document-management-app-jbey7enb.devinapps.com",
+            "Access-Control-Allow-Credentials": "true",
+        },
+    )
 
 @router.get("/callback")
 async def oauth_callback(
@@ -63,7 +84,7 @@ async def oauth_callback(
     db.commit()
     
     # Redirect to frontend with token
-    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.fly.dev")
+    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
     return RedirectResponse(url=f"{frontend_url}/dashboard")
 
 @router.get("/refresh")
