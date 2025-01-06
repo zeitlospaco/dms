@@ -41,11 +41,11 @@ class GoogleDriveService:
             },
             scopes=cls.SCOPES
         )
+        flow.redirect_uri = redirect_uri
         auth_url, _ = flow.authorization_url(
             access_type='offline',
             prompt='consent',
-            include_granted_scopes='true',
-            redirect_uri=redirect_uri
+            include_granted_scopes='true'
         )
         return flow, auth_url
     
