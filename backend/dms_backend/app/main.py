@@ -33,8 +33,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
     expose_headers=["Content-Length", "Content-Range"],
-    max_age=86400,  # Cache preflight requests for 24 hours
-    allow_credentials=True
+    max_age=86400  # Cache preflight requests for 24 hours
 )
 
 # Add logging middleware for debugging
