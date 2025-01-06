@@ -17,24 +17,11 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.options("/login")
-async def login_options():
-    """Handle preflight requests for login endpoint"""
-    response = JSONResponse(content={})
-    response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
-    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
-
 @router.get("/login")
 async def login():
     """Start OAuth2 login flow"""
     flow, auth_url = GoogleDriveService.create_auth_url()
-    response = JSONResponse(content={"auth_url": auth_url})
-    response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+    return {"auth_url": auth_url}
 
 @router.get("/callback")
 async def oauth_callback(
@@ -79,10 +66,7 @@ async def oauth_callback(
     
     # Redirect to frontend with token
     frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-    response = RedirectResponse(url=f"{frontend_url}/dashboard")
-    response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+    return RedirectResponse(url=f"{frontend_url}/dashboard")
 
 @router.get("/refresh")
 async def refresh_token(
@@ -91,13 +75,10 @@ async def refresh_token(
     """Refresh OAuth2 token"""
     user = db.query(User).first()  # In reality, get current user
     if not user or not user.credentials:
-        response = JSONResponse(
+        return JSONResponse(
             status_code=401,
             content={"detail": "Not authenticated"}
         )
-        response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        return response
     
     creds_dict = json.loads(user.credentials)
     credentials = Credentials.from_authorized_user_info(creds_dict)
@@ -118,17 +99,9 @@ async def refresh_token(
             user.credentials = json.dumps(creds_dict)
             db.commit()
         else:
-            response = JSONResponse(
+            return JSONResponse(
                 status_code=401,
                 content={"detail": "Token refresh failed"}
             )
-            response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            return response
     
-    response = JSONResponse(
-        content={"message": "Token refreshed successfully"}
-    )
-    response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+    return {"message": "Token refreshed successfully"}
