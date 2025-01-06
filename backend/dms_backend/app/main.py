@@ -17,7 +17,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DMS API")
 
-# Configure CORS
+# Configure CORS with strict origin checking
 origins = [
     "https://document-management-app-jbey7enb.devinapps.com",
     "https://app-frgtiqwl-blue-grass-9650.fly.dev",
@@ -25,15 +25,30 @@ origins = [
     "http://localhost:3000"   # Alternative development port
 ]
 
-# Add CORS middleware first to ensure it handles preflight requests
+# Add CORS middleware with explicit configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=None,  # Disable regex for stricter security
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-    expose_headers=["Content-Length", "Content-Range"],
-    max_age=86400  # Cache preflight requests for 24 hours
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Access-Control-Allow-Origin"
+    ],
+    expose_headers=[
+        "Content-Length",
+        "Content-Range",
+        "Access-Control-Allow-Origin",
+        "Access-Control-Allow-Credentials"
+    ],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 # Add logging middleware for debugging
