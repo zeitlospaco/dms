@@ -24,14 +24,25 @@ origins = [
     "http://localhost:3000"   # Alternative development port
 ]
 
+# Add CORS middleware first to ensure it handles preflight requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
-    expose_headers=["*"]
+    expose_headers=["*"],
+    max_age=86400  # Cache preflight requests for 24 hours
 )
+
+# Add logging middleware for debugging
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"Request: {request.method} {request.url}")
+    print(f"Headers: {request.headers}")
+    response = await call_next(request)
+    print(f"Response status: {response.status_code}")
+    return response
 
 # Include routers with API prefix
 app.include_router(auth.router, prefix="/api/v1")
