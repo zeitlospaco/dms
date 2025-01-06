@@ -17,15 +17,20 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DMS API")
 
-# Configure CORS with specific settings
+# Configure CORS
+origins = [
+    "https://document-management-app-jbey7enb.devinapps.com",
+    "http://localhost:5173",  # Development
+    "http://localhost:3000"   # Alternative development port
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://document-management-app-jbey7enb.devinapps.com"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Credentials"],
-    expose_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
-    max_age=3600
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Include routers with API prefix
