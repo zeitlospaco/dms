@@ -20,9 +20,8 @@ app = FastAPI(title="DMS API")
 # Configure CORS
 origins = [
     "http://localhost:5173",
-    "https://document-management-app-jbey7enb.fly.dev",
     "https://document-management-app-jbey7enb.devinapps.com",
-    "https://document-management-app-jbey7enb.devinapps.com/"
+    "https://app-frgtiqwl-blue-grass-9650.fly.dev"
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -30,8 +29,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
-    allow_origin_regex="https://.*\.devinapps\.com"
+    expose_headers=["*"]
 )
 
 # Include routers with API prefix
