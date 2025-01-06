@@ -39,8 +39,7 @@ class GoogleDriveService:
                     "token_uri": "https://oauth2.googleapis.com/token",
                 }
             },
-            scopes=cls.SCOPES,
-            redirect_uri=redirect_uri
+            scopes=cls.SCOPES
         )
         auth_url, _ = flow.authorization_url(
             access_type='offline',
