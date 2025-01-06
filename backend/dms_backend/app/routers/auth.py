@@ -21,7 +21,10 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 async def login():
     """Start OAuth2 login flow"""
     flow, auth_url = GoogleDriveService.create_auth_url()
-    return {"auth_url": auth_url}
+    response = JSONResponse(content={"auth_url": auth_url})
+    response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 @router.get("/callback")
 async def oauth_callback(
