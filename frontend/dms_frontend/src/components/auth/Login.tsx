@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import api from '../../services/api';
 
 export function Login() {
   const history = useHistory();
@@ -12,15 +13,11 @@ export function Login() {
       return;
     }
 
-    // Start Google OAuth flow
-    const backendUrl = import.meta.env.VITE_API_URL || 'https://app-frgtiqwl-blue-grass-9650.fly.dev';
-    const loginUrl = `${backendUrl}/api/v1/auth/login`;
-    
-    fetch(loginUrl)
-      .then(response => response.json())
-      .then(data => {
-        if (data.auth_url) {
-          window.location.href = data.auth_url;
+    // Start Google OAuth flow using configured API instance
+    api.get('/auth/login')
+      .then(response => {
+        if (response.data.auth_url) {
+          window.location.href = response.data.auth_url;
         }
       })
       .catch(error => {
