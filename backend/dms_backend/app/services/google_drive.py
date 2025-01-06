@@ -38,7 +38,12 @@ class GoogleDriveService:
             },
             scopes=cls.SCOPES
         )
-        auth_url = flow.authorization_url(prompt='consent')[0]
+        auth_url, _ = flow.authorization_url(
+            access_type='offline',
+            prompt='consent',
+            include_granted_scopes='true',
+            redirect_uri=os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+        )
         return flow, auth_url
     
     def create_folder(self, name: str, parent_id: Optional[str] = None) -> dict:
