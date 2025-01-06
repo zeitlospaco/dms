@@ -13,8 +13,12 @@ export function Login() {
       return;
     }
 
+    // Generate a random state parameter for OAuth security
+    const state = Math.random().toString(36).substring(7);
+    localStorage.setItem('oauth_state', state);
+
     // Start Google OAuth flow using configured API instance
-    api.get('/auth/login')
+    api.get('/auth/login', { params: { state } })
       .then(response => {
         if (response.data.auth_url) {
           window.location.href = response.data.auth_url;
@@ -22,6 +26,8 @@ export function Login() {
       })
       .catch(error => {
         console.error('Failed to get auth URL:', error);
+        // Clear state on error
+        localStorage.removeItem('oauth_state');
       });
   }, [history]);
 

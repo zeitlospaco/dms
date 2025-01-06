@@ -18,9 +18,11 @@ from fastapi.responses import JSONResponse
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.get("/login")
-async def login():
+async def login(state: str):
     """Start OAuth2 login flow"""
     flow, auth_url = GoogleDriveService.create_auth_url()
+    # Add state parameter to auth URL
+    auth_url = f"{auth_url}&state={state}"
     return JSONResponse(
         content={"auth_url": auth_url},
         headers={
@@ -33,13 +35,17 @@ async def login():
 async def oauth_callback(
     request: Request,
     code: str,
+    state: str,
     db: Session = Depends(get_db)
 ):
     """Handle OAuth2 callback"""
     flow, _ = GoogleDriveService.create_auth_url()
     
     # Get credentials from flow
-    flow.fetch_token(code=code)
+    flow.fetch_token(
+        code=code,
+        redirect_uri=os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+    )
     credentials = flow.credentials
     
     # Create service to get user info
