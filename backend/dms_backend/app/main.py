@@ -17,9 +17,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DMS API")
 
-# Initialize FastAPI app
-app = FastAPI(title="DMS API")
-
 # Configure CORS
 origins = [
     "http://localhost:5173",
@@ -31,10 +28,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Authorization", "Content-Type"],
-    expose_headers=["Authorization"],
-    max_age=600
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+    expose_headers=["Content-Type"]
 )
 
 # Include routers with API prefix
