@@ -20,6 +20,7 @@ app = FastAPI(title="DMS API")
 # Configure CORS
 origins = [
     "https://document-management-app-jbey7enb.devinapps.com",
+    "https://app-frgtiqwl-blue-grass-9650.fly.dev",
     "http://localhost:5173",  # Development
     "http://localhost:3000"   # Alternative development port
 ]
