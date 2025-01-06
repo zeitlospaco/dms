@@ -41,8 +41,7 @@ class GoogleDriveService:
         auth_url, _ = flow.authorization_url(
             access_type='offline',
             prompt='consent',
-            include_granted_scopes='true',
-            redirect_uri=os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+            include_granted_scopes='true'
         )
         return flow, auth_url
     
