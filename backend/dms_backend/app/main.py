@@ -22,9 +22,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://document-management-app-jbey7enb.devinapps.com"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
-    expose_headers=["Content-Type", "Authorization"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Credentials"],
+    expose_headers=["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
     max_age=3600
 )
 
