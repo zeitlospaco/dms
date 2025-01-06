@@ -21,7 +21,8 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 async def login(state: str):
     """Start OAuth2 login flow"""
     flow, auth_url = GoogleDriveService.create_auth_url()
-    return {"auth_url": auth_url}
+    # Store state parameter in session or validate it later
+    return {"auth_url": auth_url, "state": state}
 
 @router.get("/callback")
 async def oauth_callback(
