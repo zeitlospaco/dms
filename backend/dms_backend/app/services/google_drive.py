@@ -26,6 +26,10 @@ class GoogleDriveService:
     @classmethod
     def create_auth_url(cls) -> tuple[Flow, str]:
         """Create OAuth2 authorization URL"""
+        redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+        if not redirect_uri:
+            raise ValueError("GOOGLE_OAUTH_REDIRECT_URI environment variable is not set")
+
         flow = Flow.from_client_config(
             {
                 "web": {
@@ -33,15 +37,16 @@ class GoogleDriveService:
                     "client_secret": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uri": os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
                 }
             },
-            scopes=cls.SCOPES
+            scopes=cls.SCOPES,
+            redirect_uri=redirect_uri
         )
         auth_url, _ = flow.authorization_url(
             access_type='offline',
             prompt='consent',
-            include_granted_scopes='true'
+            include_granted_scopes='true',
+            redirect_uri=redirect_uri
         )
         return flow, auth_url
     
