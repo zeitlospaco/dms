@@ -17,30 +17,11 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.options("/login")
-async def login_options():
-    """Handle preflight request for login endpoint"""
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "https://document-management-app-jbey7enb.devinapps.com",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
-            "Access-Control-Max-Age": "600",
-        },
-    )
-
 @router.get("/login")
 async def login():
     """Start OAuth2 login flow"""
     flow, auth_url = GoogleDriveService.create_auth_url()
-    return JSONResponse(
-        content={"auth_url": auth_url},
-        headers={
-            "Access-Control-Allow-Origin": "https://document-management-app-jbey7enb.devinapps.com",
-            "Access-Control-Allow-Credentials": "true",
-        },
-    )
+    return {"auth_url": auth_url}
 
 @router.get("/callback")
 async def oauth_callback(
