@@ -17,6 +17,16 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+@router.options("/login")
+async def login_options():
+    """Handle preflight requests for login endpoint"""
+    response = JSONResponse(content={})
+    response.headers["Access-Control-Allow-Origin"] = "https://document-management-app-jbey7enb.devinapps.com"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
+
 @router.get("/login")
 async def login():
     """Start OAuth2 login flow"""
