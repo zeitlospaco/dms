@@ -54,13 +54,16 @@ async def oauth_callback(
         'scopes': credentials.scopes
     }
     
-    # Here you would typically get the user's email from Google's userinfo endpoint
-    # and create/update the user record
-    # For now, we'll use a placeholder
-    user = db.query(User).first()  # In reality, query by email
+    # Get user info from Google
+    drive_service = GoogleDriveService(credentials)
+    about = drive_service.service.about().get(fields="user").execute()
+    email = about["user"]["emailAddress"]
+    
+    # Find or create user
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         user = User(
-            email="placeholder@example.com",
+            email=email,
             credentials=json.dumps(creds_dict)
         )
         db.add(user)
