@@ -4,12 +4,30 @@ import api from '../../services/api';
 
 export function Login() {
   const history = useHistory();
+  const urlParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
-    // Check if we have an auth token
-    const token = localStorage.getItem('auth_token');
+    // Check URL parameters for errors or token
+    const error = urlParams.get('error');
+    const token = urlParams.get('token');
+    
+    if (error) {
+      console.error('Authentication error:', error);
+      localStorage.removeItem('oauth_state');
+      return;
+    }
+
+    // If we received a token in the URL, store it and redirect
     if (token) {
-      history.push('/');
+      localStorage.setItem('auth_token', token);
+      history.push('/dashboard');
+      return;
+    }
+
+    // Check if we already have an auth token
+    const existingToken = localStorage.getItem('auth_token');
+    if (existingToken) {
+      history.push('/dashboard');
       return;
     }
 
@@ -35,9 +53,31 @@ export function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Redirecting to login...
-          </h2>
+          {urlParams?.get('error') ? (
+            <div>
+              <h2 className="mt-6 text-center text-3xl font-extrabold text-red-600">
+                Authentication Error
+              </h2>
+              <p className="mt-2 text-center text-sm text-gray-600">
+                {urlParams.get('error') === 'auth_failed' ? 
+                  'Failed to authenticate with Google. Please try again.' :
+                  'An error occurred during authentication. Please try again.'}
+              </p>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('oauth_state');
+                  window.location.href = '/login';
+                }}
+                className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Redirecting to login...
+            </h2>
+          )}
         </div>
       </div>
     </div>
