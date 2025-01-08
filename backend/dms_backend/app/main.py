@@ -22,7 +22,8 @@ origins = [
     "https://document-management-app-jbey7enb.devinapps.com",
     "https://app-frgtiqwl-blue-grass-9650.fly.dev",
     "http://localhost:5173",  # Development
-    "http://localhost:3000"   # Alternative development port
+    "http://localhost:3000",   # Alternative development port
+    "https://accounts.google.com"  # Allow Google OAuth callbacks
 ]
 
 # Add CORS middleware with explicit configuration
