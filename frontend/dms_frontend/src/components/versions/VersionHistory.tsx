@@ -18,18 +18,18 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVersions, setSelectedVersions] = useState<[number?, number?]>([]);
-  const [comparison, setComparison] = useState<any>(null);
+  interface VersionComparison {
+    diff: string[];
+  }
+  const [comparison, setComparison] = useState<VersionComparison | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    loadVersions();
-  }, [documentId]);
 
   const loadVersions = async () => {
     try {
       const data = await versionService.getVersions(Number(documentId));
       setVersions(data);
     } catch (error) {
+      console.error('Failed to load version history:', error);
       toast({
         title: 'Error',
         description: 'Failed to load version history',
@@ -39,6 +39,27 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
       setLoading(false);
     }
   };
+
+  // Memoize loadVersions to prevent infinite loop
+  const memoizedLoadVersions = React.useCallback(async () => {
+    try {
+      const data = await versionService.getVersions(Number(documentId));
+      setVersions(data);
+    } catch (error) {
+      console.error('Failed to load version history:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load version history',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [documentId, toast]);
+
+  useEffect(() => {
+    memoizedLoadVersions();
+  }, [memoizedLoadVersions]);
 
   const handleRestore = async (versionNumber: number) => {
     try {
@@ -50,6 +71,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
       loadVersions();
       onVersionRestored?.();
     } catch (error) {
+      console.error('Failed to restore version:', error);
       toast({
         title: 'Error',
         description: 'Failed to restore version',
@@ -68,6 +90,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
         );
         setComparison(data);
       } catch (error) {
+        console.error('Failed to compare versions:', error);
         toast({
           title: 'Error',
           description: 'Failed to compare versions',
