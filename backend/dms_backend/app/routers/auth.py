@@ -40,11 +40,19 @@ async def oauth_callback(
             flow.fetch_token(code=code)
             credentials = flow.credentials
             
-            # Verify that our required scopes are included in the granted scopes
-            required_scopes = set(GoogleDriveService.SCOPES)
-            granted_scopes = set(credentials.scopes)
-            if not required_scopes.issubset(granted_scopes):
-                raise ValueError("Required scopes not granted")
+            # Log the scopes for debugging
+            print(f"Required scopes: {GoogleDriveService.SCOPES}")
+            print(f"Granted scopes: {credentials.scopes}")
+            
+            # Convert scopes to sets for comparison
+            required_scopes = {scope.strip() for scope in GoogleDriveService.SCOPES}
+            granted_scopes = {scope.strip() for scope in credentials.scopes}
+            
+            # Check if all required scopes are included in granted scopes
+            missing_scopes = required_scopes - granted_scopes
+            if missing_scopes:
+                print(f"Missing required scopes: {missing_scopes}")
+                raise ValueError(f"Missing required scopes: {missing_scopes}")
                 
         except ValueError as e:
             print(f"Scope validation error: {str(e)}")
