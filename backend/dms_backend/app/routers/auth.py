@@ -45,34 +45,16 @@ async def oauth_callback(
             print(f"Granted scopes: {credentials.scopes}")
             
             # Convert scopes to sets for comparison
-            required_scopes = {scope.strip() for scope in GoogleDriveService.SCOPES}
-            granted_scopes = {scope.strip() for scope in credentials.scopes}
+            required_scopes = set(GoogleDriveService.SCOPES)
+            granted_scopes = set(credentials.scopes)
             
             # Log scopes for debugging
             print(f"Required scopes: {required_scopes}")
             print(f"Granted scopes: {granted_scopes}")
             
-            # Normalize scopes by removing any version-specific parts and whitespace
-            normalized_required = {scope.strip().split('auth/')[1] for scope in required_scopes}
-            normalized_granted = {scope.strip().split('auth/')[1] for scope in granted_scopes}
-            
-            print(f"Normalized required scopes: {normalized_required}")
-            print(f"Normalized granted scopes: {normalized_granted}")
-            
-            # Convert scopes to sets for comparison
-            required_scope_set = set(GoogleDriveService.SCOPES)
-            granted_scope_set = set(credentials.scopes)
-            
-            # Log the scope comparison for debugging
-            print(f"Required scopes: {required_scope_set}")
-            print(f"Granted scopes: {granted_scope_set}")
-            
-            # Check if required scopes are a subset of granted scopes
-            # This allows Google to provide additional scopes
-            if required_scope_set.issubset(granted_scope_set):
-                print("All required scopes are included in granted scopes")
-            else:
-                print(f"Missing required scopes")
+            # Check if required scopes are included in granted scopes
+            if not required_scopes.issubset(granted_scopes):
+                print(f"OAuth callback error: Scope has changed from {' '.join(required_scopes)} to {' '.join(granted_scopes)}")
                 raise ValueError("Missing required scopes")
                 
         except ValueError as e:
