@@ -36,10 +36,7 @@ async def oauth_callback(
         flow, _ = GoogleDriveService.create_auth_url()
         
         # Get credentials from flow
-        flow.fetch_token(
-            code=code,
-            redirect_uri=os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
-        )
+        flow.fetch_token(code=code)
         credentials = flow.credentials
         
         # Store credentials in database (you might want to encrypt these)
