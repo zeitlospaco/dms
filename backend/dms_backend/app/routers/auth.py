@@ -60,10 +60,9 @@ async def oauth_callback(
             print(f"Required scopes: {required_scopes_set}")
             print(f"Granted scopes: {granted_scopes_set}")
             
-            # Check if granted scopes include all required scopes
-            missing_scopes = required_scopes_set - granted_scopes_set
-            if missing_scopes:
-                print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
+            # Check if all required scopes are included in granted scopes
+            if not required_scopes_set.issubset(granted_scopes_set):
+                print(f"OAuth callback error: Scope has changed from \"{' '.join(GoogleDriveService.SCOPES)}\" to \"{' '.join(credentials.scopes)}\".")
                 frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
                 return RedirectResponse(
                     url=f"{frontend_url}/login?error=insufficient_scopes",
