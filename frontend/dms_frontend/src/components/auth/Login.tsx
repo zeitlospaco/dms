@@ -7,20 +7,12 @@ export function Login() {
   const urlParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
-    // Check URL parameters for errors or token
+    // Check for authentication errors
     const error = urlParams.get('error');
-    const token = urlParams.get('token');
-    
     if (error) {
       console.error('Authentication error:', error);
       localStorage.removeItem('oauth_state');
-      return;
-    }
-
-    // If we received a token in the URL, store it and redirect
-    if (token) {
-      localStorage.setItem('auth_token', token);
-      history.push('/dashboard');
+      localStorage.removeItem('auth_token');
       return;
     }
 
@@ -31,21 +23,22 @@ export function Login() {
       return;
     }
 
-    // Generate a random state parameter for OAuth security
-    const state = Math.random().toString(36).substring(7);
+    // If no error and no token, start OAuth flow
+    const state = Math.random().toString(36).substring(7) + Math.random().toString(36).substring(7);
     localStorage.setItem('oauth_state', state);
 
     // Start Google OAuth flow using configured API instance
     api.get('/auth/login', { params: { state } })
       .then(response => {
         if (response.data.auth_url) {
+          console.log('Starting OAuth flow with state:', state);
           window.location.href = response.data.auth_url;
         }
       })
       .catch(error => {
         console.error('Failed to get auth URL:', error);
-        // Clear state on error
         localStorage.removeItem('oauth_state');
+        localStorage.removeItem('auth_token');
       });
   }, [history]);
 

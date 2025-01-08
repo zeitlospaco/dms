@@ -142,7 +142,31 @@ function App() {
           {isAuthenticated ? <Redirect to="/dashboard" /> : <Login />}
         </Route>
         <Route path="/callback">
-          <Login />
+          {() => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            const error = params.get('error');
+            const state = params.get('state');
+            const storedState = localStorage.getItem('oauth_state');
+            
+            // Clear OAuth state after checking
+            localStorage.removeItem('oauth_state');
+            
+            if (error) {
+              return <Redirect to={`/login?error=${error}`} />;
+            }
+            
+            if (!state || state !== storedState) {
+              return <Redirect to="/login?error=invalid_state" />;
+            }
+            
+            if (token) {
+              localStorage.setItem('auth_token', token);
+              return <Redirect to="/dashboard" />;
+            }
+            
+            return <Redirect to="/login?error=no_token" />;
+          }}
         </Route>
         <Route path="/dashboard">
           {isAuthenticated ? <DashboardContent /> : <Redirect to="/login" />}
