@@ -141,6 +141,9 @@ function App() {
         <Route path="/login">
           {isAuthenticated ? <Redirect to="/dashboard" /> : <Login />}
         </Route>
+        <Route path="/callback">
+          <Login />
+        </Route>
         <Route path="/dashboard">
           {isAuthenticated ? <DashboardContent /> : <Redirect to="/login" />}
         </Route>

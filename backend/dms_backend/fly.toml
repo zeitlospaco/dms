@@ -22,6 +22,14 @@ primary_region = "fra"
   min_machines_running = 1
   processes = ["app"]
 
+  [[http_service.routes]]
+    handlers = ["*"]
+    path = "/api/v1/auth/callback"
+
+  [[http_service.routes]]
+    handlers = ["*"]
+    path = "/api/v1/*"
+
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
