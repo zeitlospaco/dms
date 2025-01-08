@@ -58,8 +58,10 @@ async def oauth_callback(
             
             # Check if granted scopes include our required scopes
             if not granted_scope_set.issuperset(required_scope_set):
-                print(f"OAuth callback error: Missing required scopes. Required: {required_scope_set}, Granted: {granted_scope_set}")
-                raise ValueError("Missing required scopes")
+                print(f"OAuth callback error: Scope validation failed. Required: {required_scope_set}, Granted: {granted_scope_set}")
+                raise ValueError("Insufficient scopes granted")
+            
+            print("Scope validation successful - all required scopes are present")
                 
         except ValueError as e:
             print(f"Scope validation error: {str(e)}")
