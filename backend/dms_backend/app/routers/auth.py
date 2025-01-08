@@ -61,8 +61,8 @@ async def oauth_callback(
             
             # Check if all required scopes are included in granted scopes
             # We only care that our required scopes are included, additional scopes are fine
-            if not normalized_required.issubset(normalized_granted):
-                missing_scopes = normalized_required - normalized_granted
+            if not all(scope in normalized_granted for scope in normalized_required):
+                missing_scopes = [scope for scope in normalized_required if scope not in normalized_granted]
                 print(f"Missing required scopes: {missing_scopes}")
                 raise ValueError(f"Missing required scopes: {missing_scopes}")
             else:
