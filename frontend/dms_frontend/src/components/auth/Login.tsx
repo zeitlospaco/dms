@@ -24,14 +24,21 @@ export function Login() {
     }
 
     // If no error and no token, start OAuth flow
-    const state = Math.random().toString(36).substring(7) + Math.random().toString(36).substring(7);
+    const generateState = () => {
+      const randomBytes = new Uint8Array(16);
+      window.crypto.getRandomValues(randomBytes);
+      return Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    };
+    
+    const state = generateState();
     localStorage.setItem('oauth_state', state);
+    console.log('Starting OAuth flow');
 
     // Start Google OAuth flow using configured API instance
     api.get('/auth/login', { params: { state } })
       .then(response => {
         if (response.data.auth_url) {
-          console.log('Starting OAuth flow with state:', state);
+          console.log('Redirecting to Google OAuth');
           window.location.href = response.data.auth_url;
         }
       })
