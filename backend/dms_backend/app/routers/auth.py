@@ -61,6 +61,11 @@ async def oauth_callback(
                 print(f"OAuth callback error: Scope validation failed. Required: {required_scope_set}, Granted: {granted_scope_set}")
                 raise ValueError("Insufficient scopes granted")
             
+            # Log the additional scopes that were granted
+            additional_scopes = granted_scope_set - required_scope_set
+            if additional_scopes:
+                print(f"Additional scopes granted: {additional_scopes}")
+            
             print("Scope validation successful - all required scopes are present")
                 
         except ValueError as e:
