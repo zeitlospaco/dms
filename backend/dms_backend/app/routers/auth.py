@@ -56,20 +56,18 @@ async def oauth_callback(
             print(f"Required scopes (normalized): {required_scope_set}")
             print(f"Granted scopes (normalized): {granted_scope_set}")
             
-            # Check if all required scopes are present in granted scopes
-            missing_scopes = required_scope_set - granted_scope_set
-            if missing_scopes:
+            # Only check if required scopes are a subset of granted scopes
+            if not required_scope_set.issubset(granted_scope_set):
+                missing_scopes = required_scope_set - granted_scope_set
                 print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
                 print(f"Required scopes: {required_scope_set}")
                 print(f"Granted scopes: {granted_scope_set}")
                 raise ValueError(f"Missing required scopes: {missing_scopes}")
             
-            # Log successful validation and any additional scopes
+            # Log successful validation
             print("Scope validation successful - all required scopes are present")
-            additional_scopes = granted_scope_set - required_scope_set
-            if additional_scopes:
-                print(f"Additional scopes granted (this is normal): {additional_scopes}")
-            
+            print(f"Required scopes: {required_scope_set}")
+            print(f"Granted scopes: {granted_scope_set}")
             print("OAuth callback proceeding with valid scopes")
                 
         except ValueError as e:
