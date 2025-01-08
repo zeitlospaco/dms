@@ -53,7 +53,7 @@ async def oauth_callback(
             print(f"Granted scopes: {granted_scopes}")
             
             # Check if all required scopes are included in granted scopes
-            if not required_scopes.issubset(granted_scopes):
+            if not granted_scopes.issuperset(required_scopes):
                 missing_scopes = required_scopes - granted_scopes
                 print(f"Missing required scopes: {missing_scopes}")
                 raise ValueError(f"Missing required scopes: {missing_scopes}")
