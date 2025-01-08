@@ -32,49 +32,70 @@ async def oauth_callback(
     db: Session = Depends(get_db)
 ):
     """Handle OAuth2 callback"""
-    flow, _ = GoogleDriveService.create_auth_url()
-    
-    # Get credentials from flow
-    flow.fetch_token(
-        code=code,
-        redirect_uri=os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
-    )
-    credentials = flow.credentials
-    
-    # Create service to get user info
-    service = GoogleDriveService(credentials)
-    
-    # Store credentials in database (you might want to encrypt these)
-    creds_dict = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
-    }
-    
-    # Get user info from Google
-    drive_service = GoogleDriveService(credentials)
-    about = drive_service.service.about().get(fields="user").execute()
-    email = about["user"]["emailAddress"]
-    
-    # Find or create user
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        user = User(
-            email=email,
-            credentials=json.dumps(creds_dict)
+    try:
+        flow, _ = GoogleDriveService.create_auth_url()
+        
+        # Get credentials from flow
+        flow.fetch_token(
+            code=code,
+            redirect_uri=os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
         )
-        db.add(user)
-    else:
-        user.credentials = json.dumps(creds_dict)
-    
-    db.commit()
-    
-    # Redirect to frontend with token
-    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-    return RedirectResponse(url=f"{frontend_url}/dashboard")
+        credentials = flow.credentials
+        
+        # Store credentials in database (you might want to encrypt these)
+        creds_dict = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes
+        }
+        
+        # Get user info from Google
+        drive_service = GoogleDriveService(credentials)
+        try:
+            about = drive_service.service.about().get(fields="user").execute()
+            email = about["user"]["emailAddress"]
+        except Exception as e:
+            print(f"Error getting user info: {str(e)}")
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Failed to get user information from Google Drive"}
+            )
+        
+        try:
+            # Find or create user
+            user = db.query(User).filter(User.email == email).first()
+            if not user:
+                user = User(
+                    email=email,
+                    credentials=json.dumps(creds_dict)
+                )
+                db.add(user)
+            else:
+                user.credentials = json.dumps(creds_dict)
+            
+            db.commit()
+        except Exception as e:
+            print(f"Database error: {str(e)}")
+            db.rollback()
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Failed to save user information"}
+            )
+        
+        # Redirect to frontend with token
+        frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+        return RedirectResponse(url=f"{frontend_url}/dashboard", status_code=302)
+            
+    except Exception as e:
+        print(f"OAuth callback error: {str(e)}")
+        frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+        return RedirectResponse(
+            url=f"{frontend_url}/login?error=auth_failed",
+            status_code=302
+        )
 
 @router.get("/refresh")
 async def refresh_token(
