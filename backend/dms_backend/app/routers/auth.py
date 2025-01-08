@@ -56,17 +56,12 @@ async def oauth_callback(
             print(f"OAuth callback - Required scopes: {required_scopes_set}")
             print(f"OAuth callback - Granted scopes: {granted_scopes_set}")
             
-            # Log the scope comparison for debugging
-            print(f"Required scopes: {required_scopes_set}")
-            print(f"Granted scopes: {granted_scopes_set}")
-            
-            # Check if all required scopes are included in granted scopes
+            # Check if granted scopes include all required scopes
             if not required_scopes_set.issubset(granted_scopes_set):
-                missing_scopes = required_scopes_set - granted_scopes_set
-                print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
+                print(f"OAuth callback error: Scope has changed from \"{' '.join(required_scopes_set)}\" to \"{' '.join(granted_scopes_set)}\".")
                 frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
                 return RedirectResponse(
-                    url=f"{frontend_url}/login?error=insufficient_scopes",
+                    url=f"{frontend_url}/login?error=auth_failed",
                     status_code=302
                 )
             
