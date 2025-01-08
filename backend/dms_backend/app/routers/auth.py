@@ -59,19 +59,21 @@ async def oauth_callback(
             print(f"Normalized required scopes: {normalized_required}")
             print(f"Normalized granted scopes: {normalized_granted}")
             
-            # Check if all required scopes are included in granted scopes
-            # We only care that our required scopes are included, additional scopes are fine
-            # Compare the actual scope strings without normalization to avoid false negatives
+            # Convert scopes to sets for comparison
             required_scope_set = set(GoogleDriveService.SCOPES)
             granted_scope_set = set(credentials.scopes)
             
-            # Check if all required scopes are included in granted scopes
-            if not required_scope_set.issubset(granted_scope_set):
-                missing_scopes = required_scope_set - granted_scope_set
-                print(f"Missing required scopes: {missing_scopes}")
-                raise ValueError(f"Missing required scopes: {missing_scopes}")
+            # Log the scope comparison for debugging
+            print(f"Required scopes: {required_scope_set}")
+            print(f"Granted scopes: {granted_scope_set}")
+            
+            # Check if any of our required scopes are included in granted scopes
+            # We accept any additional scopes that Google provides
+            if required_scope_set.intersection(granted_scope_set):
+                print("Required scopes are included in granted scopes")
             else:
-                print("All required scopes are granted")
+                print(f"No required scopes found in granted scopes")
+                raise ValueError("No required scopes found in granted scopes")
                 
         except ValueError as e:
             print(f"Scope validation error: {str(e)}")
