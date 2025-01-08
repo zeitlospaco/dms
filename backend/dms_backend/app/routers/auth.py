@@ -56,28 +56,21 @@ async def oauth_callback(
             print(f"Required scopes (normalized): {required_scope_set}")
             print(f"Granted scopes (normalized): {granted_scope_set}")
             
-            # Check if granted scopes include our required scopes
-            if not granted_scope_set.issuperset(required_scope_set):
-                print(f"OAuth callback error: Scope validation failed. Required: {required_scope_set}, Granted: {granted_scope_set}")
-                raise ValueError("Insufficient scopes granted")
+            # Check if all required scopes are present in granted scopes
+            missing_scopes = required_scope_set - granted_scope_set
+            if missing_scopes:
+                print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
+                print(f"Required scopes: {required_scope_set}")
+                print(f"Granted scopes: {granted_scope_set}")
+                raise ValueError(f"Missing required scopes: {missing_scopes}")
             
-            # Log the additional scopes that were granted
+            # Log successful validation and any additional scopes
+            print("Scope validation successful - all required scopes are present")
             additional_scopes = granted_scope_set - required_scope_set
             if additional_scopes:
-                print(f"Additional scopes granted: {additional_scopes}")
+                print(f"Additional scopes granted (this is normal): {additional_scopes}")
             
-            print("Scope validation successful - all required scopes are present")
-            # Check if granted scopes include our required scopes
-            if not granted_scope_set.issuperset(required_scope_set):
-                print(f"OAuth callback error: Scope validation failed. Required: {required_scope_set}, Granted: {granted_scope_set}")
-                raise ValueError("Insufficient scopes granted")
-            
-            # Log the additional scopes that were granted
-            additional_scopes = granted_scope_set - required_scope_set
-            if additional_scopes:
-                print(f"Additional scopes granted: {additional_scopes}")
-            
-            print("Scope validation successful - all required scopes are present")
+            print("OAuth callback proceeding with valid scopes")
                 
         except ValueError as e:
             print(f"Scope validation error: {str(e)}")
