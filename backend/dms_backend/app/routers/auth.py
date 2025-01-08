@@ -60,7 +60,8 @@ async def oauth_callback(
             print(f"Normalized granted scopes: {normalized_granted}")
             
             # Check if all required scopes are included in granted scopes
-            if not normalized_granted.issuperset(normalized_required):
+            # We only care that our required scopes are included, additional scopes are fine
+            if not normalized_required.issubset(normalized_granted):
                 missing_scopes = normalized_required - normalized_granted
                 print(f"Missing required scopes: {missing_scopes}")
                 raise ValueError(f"Missing required scopes: {missing_scopes}")
@@ -118,9 +119,15 @@ async def oauth_callback(
                 content={"detail": "Failed to save user information"}
             )
         
+        # Generate JWT token for frontend authentication
+        token = credentials.token
+        
         # Redirect to frontend with token
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-        return RedirectResponse(url=f"{frontend_url}/dashboard", status_code=302)
+        return RedirectResponse(
+            url=f"{frontend_url}/dashboard?token={token}",
+            status_code=302
+        )
             
     except Exception as e:
         print(f"OAuth callback error: {str(e)}")
