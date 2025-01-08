@@ -35,9 +35,24 @@ async def oauth_callback(
     try:
         flow, _ = GoogleDriveService.create_auth_url()
         
-        # Get credentials from flow
-        flow.fetch_token(code=code)
-        credentials = flow.credentials
+        try:
+            # Get credentials from flow
+            flow.fetch_token(code=code)
+            credentials = flow.credentials
+            
+            # Verify that our required scopes are included in the granted scopes
+            required_scopes = set(GoogleDriveService.SCOPES)
+            granted_scopes = set(credentials.scopes)
+            if not required_scopes.issubset(granted_scopes):
+                raise ValueError("Required scopes not granted")
+                
+        except ValueError as e:
+            print(f"Scope validation error: {str(e)}")
+            frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+            return RedirectResponse(
+                url=f"{frontend_url}/login?error=insufficient_scopes",
+                status_code=302
+            )
         
         # Store credentials in database (you might want to encrypt these)
         creds_dict = {
