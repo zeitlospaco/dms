@@ -60,6 +60,7 @@ async def oauth_callback(
             if all(scope in granted_scopes_set for scope in required_scopes_set):
                 print("Scope validation successful - all required scopes are present")
                 print("OAuth callback proceeding with valid scopes")
+                # Continue with the OAuth flow since we have all required scopes
             else:
                 missing_scopes = required_scopes_set - granted_scopes_set
                 print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
