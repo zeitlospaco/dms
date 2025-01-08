@@ -44,30 +44,20 @@ async def oauth_callback(
             print(f"Required scopes: {GoogleDriveService.SCOPES}")
             print(f"Granted scopes: {credentials.scopes}")
             
-            # Convert scopes to sets for comparison
-            required_scopes = set(GoogleDriveService.SCOPES)
-            granted_scopes = set(credentials.scopes)
+            # Log scopes for debugging
+            print(f"Required scopes: {GoogleDriveService.SCOPES}")
+            print(f"Granted scopes: {credentials.scopes}")
             
-            # Normalize scopes by splitting into individual strings
-            required_scope_set = set(scope.strip() for scope in ' '.join(required_scopes).split())
-            granted_scope_set = set(scope.strip() for scope in ' '.join(granted_scopes).split())
+            # Check if granted scopes include all required scopes
+            required_scopes_set = set(GoogleDriveService.SCOPES)
+            granted_scopes_set = set(credentials.scopes)
             
-            # Log normalized scopes for debugging
-            print(f"Required scopes (normalized): {required_scope_set}")
-            print(f"Granted scopes (normalized): {granted_scope_set}")
-            
-            # Only check if required scopes are a subset of granted scopes
-            if not required_scope_set.issubset(granted_scope_set):
-                missing_scopes = required_scope_set - granted_scope_set
+            if not required_scopes_set.issubset(granted_scopes_set):
+                missing_scopes = required_scopes_set - granted_scopes_set
                 print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
-                print(f"Required scopes: {required_scope_set}")
-                print(f"Granted scopes: {granted_scope_set}")
                 raise ValueError(f"Missing required scopes: {missing_scopes}")
             
-            # Log successful validation
             print("Scope validation successful - all required scopes are present")
-            print(f"Required scopes: {required_scope_set}")
-            print(f"Granted scopes: {granted_scope_set}")
             print("OAuth callback proceeding with valid scopes")
                 
         except ValueError as e:
