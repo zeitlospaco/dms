@@ -67,9 +67,9 @@ async def oauth_callback(
             print(f"Required scopes: {required_scope_set}")
             print(f"Granted scopes: {granted_scope_set}")
             
-            # Check if all our required scopes are included in granted scopes
-            # We accept any additional scopes that Google provides
-            if all(scope in granted_scope_set for scope in required_scope_set):
+            # Check if required scopes are a subset of granted scopes
+            # This allows Google to provide additional scopes
+            if required_scope_set.issubset(granted_scope_set):
                 print("All required scopes are included in granted scopes")
             else:
                 print(f"Missing required scopes")
