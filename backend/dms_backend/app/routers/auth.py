@@ -59,15 +59,17 @@ async def oauth_callback(
             # Log scope changes but continue with authentication
             if not required_scopes_set.issubset(granted_scopes_set):
                 print(f"Notice: Scope expanded from \"{' '.join(required_scopes_set)}\" to \"{' '.join(granted_scopes_set)}\".")
+                frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+                return RedirectResponse(
+                    url=f"{frontend_url}/login?error=insufficient_scopes",
+                    status_code=302
+                )
             
             # Continue with authentication as long as we have the required scopes
-            if required_scopes_set.issubset(granted_scopes_set):
-                print("Required scopes are present, continuing with authentication")
-            
+            print("Required scopes are present, continuing with authentication")
             print("Scope validation successful - all required scopes are present")
             print("OAuth callback proceeding with valid scopes")
             # Continue with the OAuth flow since we have all required scopes
-                
         except ValueError as e:
             print(f"Scope validation error: {str(e)}")
             frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
