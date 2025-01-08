@@ -52,6 +52,11 @@ async def oauth_callback(
             required_scopes_set = set(GoogleDriveService.SCOPES)
             granted_scopes_set = set(credentials.scopes)
             
+            # Log the scope comparison for debugging
+            print(f"OAuth callback - Required scopes: {required_scopes_set}")
+            print(f"OAuth callback - Granted scopes: {granted_scopes_set}")
+            
+            # Allow additional scopes, just ensure our required ones are included
             if not required_scopes_set.issubset(granted_scopes_set):
                 missing_scopes = required_scopes_set - granted_scopes_set
                 print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
