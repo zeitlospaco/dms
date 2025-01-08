@@ -52,9 +52,16 @@ async def oauth_callback(
             print(f"Required scopes: {required_scopes}")
             print(f"Granted scopes: {granted_scopes}")
             
+            # Normalize scopes by removing any version-specific parts and whitespace
+            normalized_required = {scope.strip().split('auth/')[1] for scope in required_scopes}
+            normalized_granted = {scope.strip().split('auth/')[1] for scope in granted_scopes}
+            
+            print(f"Normalized required scopes: {normalized_required}")
+            print(f"Normalized granted scopes: {normalized_granted}")
+            
             # Check if all required scopes are included in granted scopes
-            if not granted_scopes.issuperset(required_scopes):
-                missing_scopes = required_scopes - granted_scopes
+            if not normalized_granted.issuperset(normalized_required):
+                missing_scopes = normalized_required - normalized_granted
                 print(f"Missing required scopes: {missing_scopes}")
                 raise ValueError(f"Missing required scopes: {missing_scopes}")
             else:
