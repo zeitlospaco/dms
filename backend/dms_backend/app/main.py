@@ -7,7 +7,7 @@ import os
 
 from app.database import get_db, engine
 from app.models import Base, User, Document, Folder
-from app.routers import auth, documents, categories, logs, notifications, optimization, feedback
+from app.routers import auth, documents, categories, logs, notifications, optimization, feedback, sheets
 from app.services.google_drive import GoogleDriveService
 from app.services.folder_structure import FolderStructureService
 from app.services.model_trainer import start_model_trainer
@@ -69,6 +69,7 @@ app.include_router(logs.router, prefix="/api/v1")
 app.include_router(notifications.router, prefix="/api/v1")
 app.include_router(optimization.router, prefix="/api/v1")
 app.include_router(feedback.router, prefix="/api/v1")
+app.include_router(sheets.router, prefix="/api/v1")
 
 # Webhook endpoint for Google Drive Push Notifications
 @app.post("/webhook/drive")

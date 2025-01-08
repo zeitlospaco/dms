@@ -27,8 +27,9 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    role = Column(String)  # admin or user
+    hashed_password = Column(String, nullable=True)
+    role = Column(String, nullable=True)  # admin or user
+    credentials = Column(String, nullable=True)  # Store OAuth credentials as JSON string
     created_at = Column(DateTime, default=datetime.utcnow)
     documents = relationship("Document", back_populates="owner")
     logs = relationship("LogEntry", back_populates="user")
