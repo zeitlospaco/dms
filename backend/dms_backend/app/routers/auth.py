@@ -56,19 +56,23 @@ async def oauth_callback(
             print(f"OAuth callback - Required scopes: {required_scopes_set}")
             print(f"OAuth callback - Granted scopes: {granted_scopes_set}")
             
-            # Simple check: verify all required scopes are present in granted scopes
-            if all(scope in granted_scopes_set for scope in required_scopes_set):
-                print("Scope validation successful - all required scopes are present")
-                print("OAuth callback proceeding with valid scopes")
-                # Continue with the OAuth flow since we have all required scopes
-            else:
-                missing_scopes = required_scopes_set - granted_scopes_set
+            # Log the scope comparison for debugging
+            print(f"Required scopes: {required_scopes_set}")
+            print(f"Granted scopes: {granted_scopes_set}")
+            
+            # Check if granted scopes include all required scopes
+            missing_scopes = required_scopes_set - granted_scopes_set
+            if missing_scopes:
                 print(f"OAuth callback error: Missing required scopes: {missing_scopes}")
                 frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
                 return RedirectResponse(
                     url=f"{frontend_url}/login?error=insufficient_scopes",
                     status_code=302
                 )
+            
+            print("Scope validation successful - all required scopes are present")
+            print("OAuth callback proceeding with valid scopes")
+            # Continue with the OAuth flow since we have all required scopes
                 
         except ValueError as e:
             print(f"Scope validation error: {str(e)}")
