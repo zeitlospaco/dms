@@ -52,9 +52,9 @@ async def oauth_callback(
             print(f"Required scopes: {required_scopes}")
             print(f"Granted scopes: {granted_scopes}")
             
-            # Check if required scopes are included in granted scopes
-            if not required_scopes.issubset(granted_scopes):
-                print(f"OAuth callback error: Scope has changed from {' '.join(required_scopes)} to {' '.join(granted_scopes)}")
+            # Check if granted scopes include our required scopes
+            if not granted_scopes.issuperset(required_scopes):
+                print(f"OAuth callback error: Missing required scopes. Required: {' '.join(required_scopes)}, Granted: {' '.join(granted_scopes)}")
                 raise ValueError("Missing required scopes")
                 
         except ValueError as e:
