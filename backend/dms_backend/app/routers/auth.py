@@ -58,8 +58,8 @@ async def oauth_callback(
         )
     """Handle OAuth2 callback"""
     try:
-        # Get the redirect URI from request params or environment
-        redirect_uri = request.query_params.get('redirect_uri') or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback")
+        # Always use the backend URL for OAuth callback
+        redirect_uri = "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/callback"
         print(f"Using redirect URI in callback: {redirect_uri}")
         flow, _ = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
         
