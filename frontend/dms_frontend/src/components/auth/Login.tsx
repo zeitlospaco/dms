@@ -1,71 +1,54 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import api from '../../services/api';
+import { initiateOAuth, handleCallback } from '../../services/auth';
 
 export function Login() {
   const history = useHistory();
   const urlParams = new URLSearchParams(window.location.search);
 
   useEffect(() => {
-    // Check for authentication errors
-    const error = urlParams.get('error');
-    if (error) {
-      console.error('Authentication error:', error);
-      localStorage.removeItem('oauth_state');
-      localStorage.removeItem('auth_token');
-      return;
-    }
-
-    // Check if we already have an auth token
-    const existingToken = localStorage.getItem('auth_token');
-    if (existingToken) {
-      history.push('/dashboard');
-      return;
-    }
-
-    // If no error and no token, start OAuth flow
-    const generateState = () => {
-      const randomBytes = new Uint8Array(16);
-      window.crypto.getRandomValues(randomBytes);
-      return Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
-    };
-    
-    // Check if we're in the callback flow
-    const receivedState = urlParams.get('state');
-    if (receivedState) {
-      const savedState = localStorage.getItem('oauth_state');
-      if (receivedState !== savedState) {
-        console.error('State mismatch - possible CSRF attack');
-        localStorage.removeItem('oauth_state');
-        history.push('/login?error=invalid_state');
-        return;
-      }
-    } else {
-      // Start new OAuth flow
-      const state = generateState();
-      localStorage.setItem('oauth_state', state);
-      console.log('Starting OAuth flow');
-
-    // Start Google OAuth flow using configured API instance
-    api.get('/auth/login', { 
-      params: { 
-        state,
-        redirect_uri: `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/callback`
-      } 
-    })
-      .then(response => {
-        if (response.data.auth_url) {
-          console.log('Redirecting to Google OAuth with state:', state);
-          window.location.href = response.data.auth_url;
+    const handleAuth = async () => {
+      try {
+        // Check for authentication errors
+        const error = urlParams.get('error');
+        if (error) {
+          console.error('Authentication error:', error);
+          localStorage.removeItem('oauth_state');
+          localStorage.removeItem('auth_token');
+          return;
         }
-      })
-      .catch(error => {
-        console.error('Failed to get auth URL:', error);
+
+        // Check if we already have an auth token
+        const existingToken = localStorage.getItem('auth_token');
+        if (existingToken) {
+          history.push('/dashboard');
+          return;
+        }
+
+        // Check if we're in the callback flow
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        
+        if (code && state) {
+          // Handle OAuth callback
+          await handleCallback(code, state);
+          history.push('/dashboard');
+        } else {
+          // Start new OAuth flow
+          console.log('Starting OAuth flow');
+          const { auth_url } = await initiateOAuth();
+          console.log('Redirecting to Google OAuth');
+          window.location.href = auth_url;
+        }
+      } catch (error) {
+        console.error('Authentication error:', error);
         localStorage.removeItem('oauth_state');
         localStorage.removeItem('auth_token');
         history.push('/login?error=auth_failed');
-      });
-    }
+      }
+    };
+
+    handleAuth();
   }, [history, urlParams]);
 
   return (
