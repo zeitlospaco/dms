@@ -152,7 +152,7 @@ async def oauth_callback(
         # Redirect to frontend callback with token
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
         return RedirectResponse(
-            url=f"{frontend_url}/callback?token={token}",
+            url=f"{frontend_url}/api/v1/auth/callback?token={token}",
             status_code=302
         )
             
