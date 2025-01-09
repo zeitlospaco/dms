@@ -20,7 +20,10 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
     """Start OAuth2 login flow"""
-    flow, auth_url = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
+    # Always use the frontend URL for redirect URI to maintain consistency
+    frontend_redirect_uri = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com") + "/api/v1/auth/callback"
+    print(f"Using frontend URL for redirect URI in login: {frontend_redirect_uri}")
+    flow, auth_url = GoogleDriveService.create_auth_url(redirect_uri=frontend_redirect_uri)
     # Store state parameter in session or validate it later
     return {"auth_url": auth_url, "state": state}
 
