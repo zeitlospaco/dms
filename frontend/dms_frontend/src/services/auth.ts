@@ -16,12 +16,17 @@ export const initiateOAuth = async () => {
     window.crypto.getRandomValues(randomBytes);
     const state = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
     
+    console.log('Generating state parameter:', state);
+    
     // Request auth URL from backend - let backend handle redirect URI
-    const response = await api.get<AuthResponse>('/auth/login', {
+    console.log('Requesting auth URL from backend');
+    const response = await api.get<AuthResponse>('/api/v1/auth/login', {
       params: {
         state
       }
     });
+    
+    console.log('Received response from backend:', response.data);
     
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
@@ -45,7 +50,7 @@ export const handleCallback = async (code: string, state: string) => {
     localStorage.removeItem('oauth_state');
     
     // Exchange code for token using the simplified callback path
-    const response = await api.get('/auth/callback', {
+    const response = await api.get('/api/v1/auth/callback', {
       params: { code, state }
     });
     
@@ -58,7 +63,7 @@ export const handleCallback = async (code: string, state: string) => {
 
 export const refreshToken = async () => {
   try {
-    const response = await api.get('/auth/refresh');
+    const response = await api.get('/api/v1/auth/refresh');
     return response.data;
   } catch (error) {
     console.error('Failed to refresh token:', error);

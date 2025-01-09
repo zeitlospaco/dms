@@ -10,9 +10,9 @@ export function Login() {
     const handleAuth = async () => {
       try {
         // Check for authentication errors
-        const error = urlParams.get('error');
-        if (error) {
-          console.error('Authentication error:', error);
+        const authError = urlParams.get('error');
+        if (authError) {
+          console.error('Authentication error:', authError);
           localStorage.removeItem('oauth_state');
           localStorage.removeItem('auth_token');
           return;
@@ -28,17 +28,34 @@ export function Login() {
         // Check if we're in the callback flow
         const code = urlParams.get('code');
         const state = urlParams.get('state');
+        const token = urlParams.get('token');
+        const error = urlParams.get('error');
         
-        if (code && state) {
-          // Handle OAuth callback
+        console.log('URL parameters:', { code, state, token, error });
+        
+        if (error) {
+          console.error('OAuth error:', error);
+          // Handle error case
+        } else if (token && state) {
+          console.log('Handling backend callback with token');
+          // Handle successful OAuth callback from backend
+          localStorage.setItem('auth_token', token);
+          history.push('/dashboard');
+        } else if (code && state) {
+          console.log('Handling Google callback with code');
+          // Handle OAuth callback from Google
           await handleCallback(code, state);
           history.push('/dashboard');
         } else {
           // Start new OAuth flow
-          console.log('Starting OAuth flow');
-          const { auth_url } = await initiateOAuth();
-          console.log('Redirecting to Google OAuth');
-          window.location.href = auth_url;
+          console.log('Starting new OAuth flow');
+          try {
+            const { auth_url } = await initiateOAuth();
+            console.log('Received auth URL:', auth_url);
+            window.location.href = auth_url;
+          } catch (error) {
+            console.error('Failed to initiate OAuth:', error);
+          }
         }
       } catch (error) {
         console.error('Authentication error:', error);
