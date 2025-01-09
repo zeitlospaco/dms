@@ -12,14 +12,10 @@ export const initiateOAuth = async () => {
     window.crypto.getRandomValues(randomBytes);
     const state = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
     
-    // Get the backend URL for the redirect_uri
-    const redirect_uri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
-    
-    // Request auth URL from backend
+    // Request auth URL from backend - let backend handle redirect URI
     const response = await api.get<AuthResponse>('/auth/login', {
       params: {
-        state,
-        redirect_uri
+        state
       }
     });
     
