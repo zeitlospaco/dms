@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { initiateOAuth, handleCallback } from '../../services/auth';
+import { initiateOAuth } from '../../services/auth';
 
 export function Login() {
   const history = useHistory();
@@ -25,26 +25,14 @@ export function Login() {
           return;
         }
 
-        // Check if we're in the callback flow
-        const code = urlParams.get('code');
-        const state = urlParams.get('state');
-        console.log('URL parameters:', { code, state });
-        
-        if (code && state) {
-          console.log('Handling Google callback with code');
-          // Handle OAuth callback from Google
-          await handleCallback(code, state);
-          history.push('/dashboard');
-        } else {
-          // Start new OAuth flow
-          console.log('Starting new OAuth flow');
-          try {
-            const { auth_url } = await initiateOAuth();
-            console.log('Received auth URL:', auth_url);
-            window.location.href = auth_url;
-          } catch (error) {
-            console.error('Failed to initiate OAuth:', error);
-          }
+        // Start new OAuth flow
+        console.log('Starting new OAuth flow');
+        try {
+          const { auth_url } = await initiateOAuth();
+          console.log('Received auth URL:', auth_url);
+          window.location.href = auth_url;
+        } catch (error) {
+          console.error('Failed to initiate OAuth:', error);
         }
       } catch (error) {
         console.error('Authentication error:', error);

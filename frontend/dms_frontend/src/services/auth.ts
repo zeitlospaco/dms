@@ -52,9 +52,14 @@ export const handleCallback = async (code: string, state: string) => {
     // Clear stored state
     localStorage.removeItem('oauth_state');
     
-    // Exchange code for token using the full callback path
+    // Exchange code for token using the full callback path and redirect URI
+    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
     const response = await api.get('/api/v1/auth/callback', {
-      params: { code, state }
+      params: { 
+        code, 
+        state,
+        redirect_uri: redirectUri
+      }
     });
     
     return response.data;
