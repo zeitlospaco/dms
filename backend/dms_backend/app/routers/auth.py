@@ -15,7 +15,7 @@ from app.models import User
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
@@ -24,13 +24,39 @@ async def login(state: str, redirect_uri: Optional[str] = None):
     # Store state parameter in session or validate it later
     return {"auth_url": auth_url, "state": state}
 
-@router.get("/callback")
+@router.get("/callback", name="oauth_callback")
 async def oauth_callback(
     request: Request,
-    code: str,
-    state: str,
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+    error: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
+    """Handle OAuth2 callback from Google"""
+    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+    
+    # Handle error cases first
+    if error:
+        return RedirectResponse(
+            url=f"{frontend_url}/login?error={error}",
+            status_code=302
+        )
+    
+    # Validate required parameters
+    if not code:
+        return RedirectResponse(
+            url=f"{frontend_url}/login?error=missing_code",
+            status_code=302
+        )
+    
+    # Validate state if provided
+    if state:
+        if not request.session.get('oauth_state') or state != request.session.get('oauth_state'):
+            return RedirectResponse(
+                url=f"{frontend_url}/login?error=invalid_state",
+                status_code=302
+            )
+        request.session.pop('oauth_state', None)
     """Handle OAuth2 callback"""
     try:
         flow, _ = GoogleDriveService.create_auth_url()
