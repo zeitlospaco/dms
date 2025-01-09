@@ -50,7 +50,7 @@ export function Login() {
     api.get('/auth/login', { 
       params: { 
         state,
-        redirect_uri: `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/callback`
+        redirect_uri: `${import.meta.env.VITE_FRONTEND_URL}/api/v1/auth/callback`
       } 
     })
       .then(response => {
