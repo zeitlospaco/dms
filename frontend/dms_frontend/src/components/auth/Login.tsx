@@ -35,10 +35,15 @@ export function Login() {
     console.log('Starting OAuth flow');
 
     // Start Google OAuth flow using configured API instance
-    api.get('/auth/login', { params: { state } })
+    api.get('/auth/login', { 
+      params: { 
+        state,
+        redirect_uri: import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI 
+      } 
+    })
       .then(response => {
         if (response.data.auth_url) {
-          console.log('Redirecting to Google OAuth');
+          console.log('Redirecting to Google OAuth with state:', state);
           window.location.href = response.data.auth_url;
         }
       })

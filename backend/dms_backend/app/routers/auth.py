@@ -18,9 +18,9 @@ from fastapi.responses import JSONResponse
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.get("/login")
-async def login(state: str):
+async def login(state: str, redirect_uri: Optional[str] = None):
     """Start OAuth2 login flow"""
-    flow, auth_url = GoogleDriveService.create_auth_url()
+    flow, auth_url = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
     # Store state parameter in session or validate it later
     return {"auth_url": auth_url, "state": state}
 

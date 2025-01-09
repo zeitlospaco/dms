@@ -32,11 +32,11 @@ class GoogleDriveService:
             self.service = build('drive', 'v3', credentials=credentials)
     
     @classmethod
-    def create_auth_url(cls) -> tuple[Flow, str]:
+    def create_auth_url(cls, redirect_uri: Optional[str] = None) -> tuple[Flow, str]:
         """Create OAuth2 authorization URL"""
-        redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
-        if not redirect_uri:
-            raise ValueError("GOOGLE_OAUTH_REDIRECT_URI environment variable is not set")
+        default_redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+        if not redirect_uri and not default_redirect_uri:
+            raise ValueError("No redirect URI provided and GOOGLE_OAUTH_REDIRECT_URI environment variable is not set")
 
         flow = Flow.from_client_config(
             {
@@ -45,11 +45,16 @@ class GoogleDriveService:
                     "client_secret": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [
+                        "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/callback",
+                        "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback",
+                        "https://developers.google.com/oauthplayground"
+                    ]
                 }
             },
             scopes=cls.SCOPES
         )
-        flow.redirect_uri = redirect_uri
+        flow.redirect_uri = redirect_uri or default_redirect_uri
         auth_url, _ = flow.authorization_url(
             access_type='offline',
             prompt='consent',
