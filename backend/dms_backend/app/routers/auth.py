@@ -15,7 +15,7 @@ from app.models import User
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
+router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
