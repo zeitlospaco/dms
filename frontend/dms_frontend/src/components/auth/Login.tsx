@@ -30,15 +30,27 @@ export function Login() {
       return Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
     };
     
-    const state = generateState();
-    localStorage.setItem('oauth_state', state);
-    console.log('Starting OAuth flow');
+    // Check if we're in the callback flow
+    const receivedState = urlParams.get('state');
+    if (receivedState) {
+      const savedState = localStorage.getItem('oauth_state');
+      if (receivedState !== savedState) {
+        console.error('State mismatch - possible CSRF attack');
+        localStorage.removeItem('oauth_state');
+        history.push('/login?error=invalid_state');
+        return;
+      }
+    } else {
+      // Start new OAuth flow
+      const state = generateState();
+      localStorage.setItem('oauth_state', state);
+      console.log('Starting OAuth flow');
 
     // Start Google OAuth flow using configured API instance
     api.get('/auth/login', { 
       params: { 
         state,
-        redirect_uri: import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI 
+        redirect_uri: `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/callback`
       } 
     })
       .then(response => {
@@ -51,7 +63,9 @@ export function Login() {
         console.error('Failed to get auth URL:', error);
         localStorage.removeItem('oauth_state');
         localStorage.removeItem('auth_token');
+        history.push('/login?error=auth_failed');
       });
+    }
   }, [history, urlParams]);
 
   return (
