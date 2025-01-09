@@ -52,8 +52,8 @@ export const handleCallback = async (code: string, state: string) => {
     // Clear stored state
     localStorage.removeItem('oauth_state');
     
-    // Exchange code for token using the full callback path and redirect URI
-    const redirectUri = import.meta.env.VITE_BACKEND_URL + '/api/v1/auth/callback';
+    // Exchange code for token using the frontend redirect URI consistently
+    const redirectUri = import.meta.env.VITE_FRONTEND_URL + '/api/v1/auth/callback';
     console.log('Using redirect URI for callback:', redirectUri);
     
     // Make the token exchange request to the backend
