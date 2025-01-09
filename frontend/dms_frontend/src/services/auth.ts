@@ -20,7 +20,7 @@ export const initiateOAuth = async () => {
     
     // Request auth URL from backend with redirect URI
     console.log('Requesting auth URL from backend');
-    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
+    const redirectUri = import.meta.env.VITE_BACKEND_URL + '/api/v1/auth/callback';
     console.log('Using redirect URI:', redirectUri);
     const response = await api.get<AuthResponse>('/api/v1/auth/login', {
       params: {
@@ -53,7 +53,7 @@ export const handleCallback = async (code: string, state: string) => {
     localStorage.removeItem('oauth_state');
     
     // Exchange code for token using the full callback path and redirect URI
-    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
+    const redirectUri = import.meta.env.VITE_BACKEND_URL + '/api/v1/auth/callback';
     console.log('Using redirect URI for callback:', redirectUri);
     
     // Make the token exchange request to the backend
