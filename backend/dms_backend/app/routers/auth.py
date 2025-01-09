@@ -30,6 +30,7 @@ async def oauth_callback(
     code: Optional[str] = None,
     state: Optional[str] = None,
     error: Optional[str] = None,
+    redirect_uri: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """Handle OAuth2 callback from Google"""
@@ -58,8 +59,9 @@ async def oauth_callback(
         )
     """Handle OAuth2 callback"""
     try:
-        # Always use the backend URL for OAuth callback
-        redirect_uri = "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/callback"
+        # Use the provided redirect URI or fall back to frontend URL
+        if not redirect_uri:
+            redirect_uri = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com") + "/api/v1/auth/callback"
         print(f"Using redirect URI in callback: {redirect_uri}")
         flow, _ = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
         
