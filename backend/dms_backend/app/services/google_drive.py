@@ -46,7 +46,7 @@ class GoogleDriveService:
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
                     "redirect_uris": [
-                        "https://document-management-app-jbey7enb.devinapps.com/callback"
+                        os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/auth/callback")
                     ]
                 }
             },
