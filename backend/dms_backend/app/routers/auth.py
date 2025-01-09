@@ -58,10 +58,12 @@ async def oauth_callback(
         )
     """Handle OAuth2 callback"""
     try:
-        flow, _ = GoogleDriveService.create_auth_url()
+        # Get the redirect URI from environment or use frontend URL
+        redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback")
+        flow, _ = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
         
         try:
-            # Get credentials from flow
+            # Get credentials from flow using the same redirect URI
             flow.fetch_token(code=code)
             credentials = flow.credentials
             
