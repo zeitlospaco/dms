@@ -15,7 +15,7 @@ from app.models import User
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
@@ -86,7 +86,7 @@ async def oauth_callback(
                 print(f"Notice: Scope expanded from \"{' '.join(required_scopes_set)}\" to \"{' '.join(granted_scopes_set)}\".")
                 frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
                 return RedirectResponse(
-                    url=f"{frontend_url}/login?error=insufficient_scopes",
+                    url=f"{frontend_url}/callback?error=insufficient_scopes",
                     status_code=302
                 )
             
@@ -99,7 +99,7 @@ async def oauth_callback(
             print(f"Scope validation error: {str(e)}")
             frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
             return RedirectResponse(
-                url=f"{frontend_url}/login?error=insufficient_scopes",
+                url=f"{frontend_url}/callback?error=insufficient_scopes",
                 status_code=302
             )
         
@@ -152,7 +152,7 @@ async def oauth_callback(
         # Redirect to frontend callback with token
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
         return RedirectResponse(
-            url=f"{frontend_url}/api/v1/auth/callback?token={token}",
+            url=f"{frontend_url}/callback?token={token}&state={state}",
             status_code=302
         )
             
@@ -160,7 +160,7 @@ async def oauth_callback(
         print(f"OAuth callback error: {str(e)}")
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
         return RedirectResponse(
-            url=f"{frontend_url}/login?error=auth_failed",
+            url=f"{frontend_url}/callback?error=auth_failed",
             status_code=302
         )
 
