@@ -52,7 +52,7 @@ export const handleCallback = async (code: string, state: string) => {
     // Clear stored state
     localStorage.removeItem('oauth_state');
     
-    // Exchange code for token using the simplified callback path
+    // Exchange code for token using the full callback path
     const response = await api.get('/api/v1/auth/callback', {
       params: { code, state }
     });
