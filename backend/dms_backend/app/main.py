@@ -7,7 +7,7 @@ import os
 
 from app.database import get_db, engine
 from app.models import Base, User, Document, Folder
-from app.routers import auth, documents, categories, logs, notifications, optimization, feedback
+from app.routers import auth, documents, categories, logs, notifications, optimization, feedback, sheets
 from app.services.google_drive import GoogleDriveService
 from app.services.folder_structure import FolderStructureService
 from app.services.model_trainer import start_model_trainer
@@ -15,26 +15,61 @@ from app.services.model_trainer import start_model_trainer
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="DMS API", on_startup=[start_model_trainer])
+app = FastAPI(title="DMS API")
 
-# Configure CORS
-origins = os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173").split(",")
+# Configure CORS with strict origin checking
+origins = [
+    "https://document-management-app-jbey7enb.devinapps.com",
+    "https://app-frgtiqwl-blue-grass-9650.fly.dev",
+    "http://localhost:5173",  # Development
+    "http://localhost:3000",   # Alternative development port
+    "https://accounts.google.com"  # Allow Google OAuth callbacks
+]
+
+# Add CORS middleware with explicit configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=None,  # Disable regex for stricter security
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Access-Control-Allow-Origin"
+    ],
+    expose_headers=[
+        "Content-Length",
+        "Content-Range",
+        "Access-Control-Allow-Origin",
+        "Access-Control-Allow-Credentials"
+    ],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(documents.router)
-app.include_router(categories.router)
-app.include_router(logs.router)
-app.include_router(notifications.router)
-app.include_router(optimization.router)
-app.include_router(feedback.router)
+# Add logging middleware for debugging
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"Request: {request.method} {request.url}")
+    print(f"Headers: {request.headers}")
+    response = await call_next(request)
+    print(f"Response status: {response.status_code}")
+    return response
+
+# Include routers with API prefix
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(documents.router, prefix="/api/v1")
+app.include_router(categories.router, prefix="/api/v1")
+app.include_router(logs.router, prefix="/api/v1")
+app.include_router(notifications.router, prefix="/api/v1")
+app.include_router(optimization.router, prefix="/api/v1")
+app.include_router(feedback.router, prefix="/api/v1")
+app.include_router(sheets.router, prefix="/api/v1")
 
 # Webhook endpoint for Google Drive Push Notifications
 @app.post("/webhook/drive")
@@ -85,7 +120,10 @@ async def sync_drive_changes(resource_id: str, db: Session):
         # Log error and handle appropriately
         print(f"Error syncing drive changes: {str(e)}")
 
-# Health check endpoint
+# Health check endpoints
 @app.get("/healthz")
+@app.get("/api/v1/healthz")
 async def healthz():
-    return {"status": "healthy"}
+    """Health check endpoint for monitoring service status"""
+    from datetime import datetime
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}

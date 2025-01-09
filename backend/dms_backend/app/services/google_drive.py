@@ -12,8 +12,16 @@ class GoogleDriveService:
     """Service for interacting with Google Drive API"""
     
     SCOPES = [
+        'https://www.googleapis.com/auth/drive',
         'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive.metadata.readonly'
+        'https://www.googleapis.com/auth/drive.metadata.readonly',
+        'https://www.googleapis.com/auth/drive.metadata',
+        'https://www.googleapis.com/auth/drive.readonly',
+        'https://www.googleapis.com/auth/drive.photos.readonly',
+        'https://www.googleapis.com/auth/drive.apps.readonly',
+        'https://www.googleapis.com/auth/drive.appdata',
+        'https://www.googleapis.com/auth/drive.meet.readonly',
+        'https://www.googleapis.com/auth/drive.scripts'
     ]
     
     def __init__(self, credentials: Optional[Credentials] = None):
@@ -24,8 +32,12 @@ class GoogleDriveService:
             self.service = build('drive', 'v3', credentials=credentials)
     
     @classmethod
-    def create_auth_url(cls) -> tuple[Flow, str]:
+    def create_auth_url(cls, redirect_uri: Optional[str] = None) -> tuple[Flow, str]:
         """Create OAuth2 authorization URL"""
+        default_redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+        if not redirect_uri and not default_redirect_uri:
+            raise ValueError("No redirect URI provided and GOOGLE_OAUTH_REDIRECT_URI environment variable is not set")
+
         flow = Flow.from_client_config(
             {
                 "web": {
@@ -33,12 +45,21 @@ class GoogleDriveService:
                     "client_secret": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uri": os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+                    "redirect_uris": [
+                        "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/callback",
+                        "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback",
+                        "https://developers.google.com/oauthplayground"
+                    ]
                 }
             },
             scopes=cls.SCOPES
         )
-        auth_url = flow.authorization_url(prompt='consent')[0]
+        flow.redirect_uri = redirect_uri or default_redirect_uri
+        auth_url, _ = flow.authorization_url(
+            access_type='offline',
+            prompt='consent',
+            include_granted_scopes='true'
+        )
         return flow, auth_url
     
     def create_folder(self, name: str, parent_id: Optional[str] = None) -> dict:
