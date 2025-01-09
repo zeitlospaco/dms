@@ -5,6 +5,10 @@ export interface AuthResponse {
   state: string;
 }
 
+export interface TokenResponse {
+  token: string;
+}
+
 export const initiateOAuth = async () => {
   try {
     // Generate a random state parameter for CSRF protection
@@ -40,7 +44,7 @@ export const handleCallback = async (code: string, state: string) => {
     // Clear stored state
     localStorage.removeItem('oauth_state');
     
-    // Exchange code for token
+    // Exchange code for token using the simplified callback path
     const response = await api.get('/auth/callback', {
       params: { code, state }
     });
