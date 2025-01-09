@@ -10,6 +10,7 @@ import { CategorySelect } from './components/categories/CategorySelect';
 import { SmartSearch } from './components/insights/SmartSearch';
 import { HealthCheck } from './components/HealthCheck';
 import type { Document } from '@/types/document';
+import { handleCallback, type TokenResponse } from './services/auth';
 
 const queryClient = new QueryClient();
 
@@ -141,14 +142,14 @@ function App() {
         <Route path="/login">
           {isAuthenticated ? <Redirect to="/dashboard" /> : <Login />}
         </Route>
-        <Route path="/callback">
+        <Route path="/api/v1/auth/callback">
           {() => {
             const params = new URLSearchParams(window.location.search);
-            const token = params.get('token');
+            const code = params.get('code');
+            const state = params.get('state');
             const error = params.get('error');
             
-            console.log('Callback received with token:', !!token);
-            console.log('Callback error:', error);
+            console.log('OAuth callback received:', { code: !!code, state: !!state, error });
             
             if (error) {
               localStorage.removeItem('oauth_state');
@@ -156,13 +157,22 @@ function App() {
               return <Redirect to={`/login?error=${error}`} />;
             }
             
-            if (token) {
-              localStorage.setItem('auth_token', token);
-              localStorage.removeItem('oauth_state');
-              return <Redirect to="/dashboard" />;
+            if (code && state) {
+              // Handle the OAuth callback with code and state
+              handleCallback(code, state)
+                .then((response: TokenResponse) => {
+                  localStorage.setItem('auth_token', response.token);
+                  localStorage.removeItem('oauth_state');
+                  window.location.href = '/dashboard';
+                })
+                .catch((err: Error) => {
+                  console.error('OAuth callback error:', err);
+                  window.location.href = '/login?error=auth_failed';
+                });
+              return <div>Processing authentication...</div>;
             }
             
-            return <Redirect to="/login?error=auth_failed" />;
+            return <Redirect to="/login?error=invalid_callback" />;
           }}
         </Route>
         <Route path="/dashboard">
