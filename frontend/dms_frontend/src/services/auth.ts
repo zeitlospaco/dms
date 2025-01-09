@@ -13,8 +13,7 @@ export const initiateOAuth = async () => {
     const state = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
     
     // Get the frontend URL for the redirect_uri
-    const frontendUrl = window.location.origin;
-    const redirect_uri = `${frontendUrl}/api/v1/auth/callback`;
+    const redirect_uri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
     
     // Request auth URL from backend
     const response = await api.get<AuthResponse>('/auth/login', {
