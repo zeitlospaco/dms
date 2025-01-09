@@ -46,9 +46,7 @@ class GoogleDriveService:
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
                     "redirect_uris": [
-                        "https://app-frgtiqwl-blue-grass-9650.fly.dev/auth/callback",
-                        "https://document-management-app-jbey7enb.devinapps.com/callback",
-                        "https://developers.google.com/oauthplayground"
+                        "https://document-management-app-jbey7enb.devinapps.com/callback"
                     ]
                 }
             },
