@@ -38,14 +38,14 @@ async def oauth_callback(
     # Handle error cases first
     if error:
         return RedirectResponse(
-            url=f"{frontend_url}/login?error={error}",
+            url=f"{frontend_url}/callback?error={error}",
             status_code=302
         )
     
     # Validate required parameters
     if not code:
         return RedirectResponse(
-            url=f"{frontend_url}/login?error=missing_code",
+            url=f"{frontend_url}/callback?error=missing_code",
             status_code=302
         )
     
@@ -53,7 +53,7 @@ async def oauth_callback(
     # TODO: Implement proper state validation using a secure storage mechanism
     if not state:
         return RedirectResponse(
-            url=f"{frontend_url}/login?error=missing_state",
+            url=f"{frontend_url}/callback?error=missing_state",
             status_code=302
         )
     """Handle OAuth2 callback"""
