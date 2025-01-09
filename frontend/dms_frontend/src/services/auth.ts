@@ -54,12 +54,13 @@ export const handleCallback = async (code: string, state: string) => {
     
     // Exchange code for token using the full callback path and redirect URI
     const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
-    const response = await api.get('/api/v1/auth/callback', {
-      params: { 
-        code, 
-        state,
-        redirect_uri: redirectUri
-      }
+    console.log('Using redirect URI for callback:', redirectUri);
+    
+    // Make the token exchange request to the backend
+    const response = await api.post('/api/v1/auth/token', {
+      code,
+      state,
+      redirect_uri: redirectUri
     });
     
     return response.data;
