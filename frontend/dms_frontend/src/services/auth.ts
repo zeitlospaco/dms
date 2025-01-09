@@ -18,11 +18,14 @@ export const initiateOAuth = async () => {
     
     console.log('Generating state parameter:', state);
     
-    // Request auth URL from backend - let backend handle redirect URI
+    // Request auth URL from backend with redirect URI
     console.log('Requesting auth URL from backend');
+    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
+    console.log('Using redirect URI:', redirectUri);
     const response = await api.get<AuthResponse>('/api/v1/auth/login', {
       params: {
-        state
+        state,
+        redirect_uri: redirectUri
       }
     });
     

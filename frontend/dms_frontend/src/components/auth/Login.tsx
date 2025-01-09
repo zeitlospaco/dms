@@ -28,20 +28,9 @@ export function Login() {
         // Check if we're in the callback flow
         const code = urlParams.get('code');
         const state = urlParams.get('state');
-        const token = urlParams.get('token');
-        const error = urlParams.get('error');
+        console.log('URL parameters:', { code, state });
         
-        console.log('URL parameters:', { code, state, token, error });
-        
-        if (error) {
-          console.error('OAuth error:', error);
-          // Handle error case
-        } else if (token && state) {
-          console.log('Handling backend callback with token');
-          // Handle successful OAuth callback from backend
-          localStorage.setItem('auth_token', token);
-          history.push('/dashboard');
-        } else if (code && state) {
+        if (code && state) {
           console.log('Handling Google callback with code');
           // Handle OAuth callback from Google
           await handleCallback(code, state);
