@@ -20,10 +20,9 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
     """Start OAuth2 login flow"""
-    # Always use the backend URL for redirect URI to maintain consistency
-    backend_url = os.getenv("BACKEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-    redirect_uri = backend_url + "/api/v1/auth/callback"
-    print(f"Using backend URL for redirect URI in login: {redirect_uri}")
+    # Use the configured OAuth redirect URI from environment
+    redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback")
+    print(f"Using configured OAuth redirect URI in login: {redirect_uri}")
     flow, auth_url = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
     print(f"Generated auth URL with redirect URI: {redirect_uri}")
     # Store state parameter in session or validate it later
@@ -64,11 +63,9 @@ async def oauth_callback(
         )
     """Handle OAuth2 callback"""
     try:
-        # Always use the backend URL for redirect URI to maintain consistency
-        backend_url = os.getenv("BACKEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-        redirect_uri = backend_url + "/api/v1/auth/callback"
-        print(f"Using backend URL for redirect URI: {redirect_uri}")
-        print(f"Using redirect URI in callback: {redirect_uri}")
+        # Use the configured OAuth redirect URI from environment
+        redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback")
+        print(f"Using configured OAuth redirect URI in callback: {redirect_uri}")
         flow, _ = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
         
         try:
