@@ -18,9 +18,9 @@ export const initiateOAuth = async () => {
     
     console.log('Generating state parameter:', state);
     
-    // Request auth URL from backend with frontend redirect URI
+    // Request auth URL from backend with backend redirect URI
     console.log('Requesting auth URL from backend');
-    const redirectUri = import.meta.env.VITE_FRONTEND_URL + '/api/v1/auth/callback';
+    const redirectUri = import.meta.env.VITE_BACKEND_URL + '/api/v1/auth/callback';
     console.log('Using redirect URI:', redirectUri);
     const response = await api.get<AuthResponse>('/api/v1/auth/login', {
       params: {
@@ -52,8 +52,8 @@ export const handleCallback = async (code: string, state: string) => {
     // Clear stored state
     localStorage.removeItem('oauth_state');
     
-    // Exchange code for token using the frontend redirect URI consistently
-    const redirectUri = import.meta.env.VITE_FRONTEND_URL + '/api/v1/auth/callback';
+    // Exchange code for token using the backend redirect URI consistently
+    const redirectUri = import.meta.env.VITE_BACKEND_URL + '/api/v1/auth/callback';
     console.log('Using redirect URI for callback:', redirectUri);
     
     // Make the token exchange request to the backend
