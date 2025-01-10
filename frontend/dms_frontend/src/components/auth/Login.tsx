@@ -39,12 +39,7 @@ export function Login() {
           const authUrlObj = new URL(auth_url);
           console.log('Parsed auth URL:', authUrlObj.toString());
           
-          // Ensure the redirect URI is using the backend URL
-          const redirectUri = import.meta.env.VITE_BACKEND_URL + '/api/v1/auth/callback';
-          authUrlObj.searchParams.set('redirect_uri', redirectUri);
-          console.log('Updated redirect URI:', redirectUri);
-          
-          // Navigate to the modified auth URL
+          // Navigate to the auth URL without modifying the redirect URI
           window.location.href = authUrlObj.toString();
         } catch (error) {
           console.error('Failed to initiate OAuth:', error);
