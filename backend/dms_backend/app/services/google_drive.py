@@ -34,9 +34,10 @@ class GoogleDriveService:
     @classmethod
     def create_auth_url(cls, redirect_uri: Optional[str] = None) -> tuple[Flow, str]:
         """Create OAuth2 authorization URL"""
-        default_redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
-        if not redirect_uri and not default_redirect_uri:
-            raise ValueError("No redirect URI provided and GOOGLE_OAUTH_REDIRECT_URI environment variable is not set")
+        frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+        default_redirect_uri = frontend_url + "/api/v1/auth/callback"
+        if not redirect_uri:
+            redirect_uri = default_redirect_uri
 
         flow = Flow.from_client_config(
             {
@@ -46,7 +47,7 @@ class GoogleDriveService:
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
                     "redirect_uris": [
-                        redirect_uri or os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com") + "/api/v1/auth/callback"
+                        redirect_uri
                     ]
                 }
             },
