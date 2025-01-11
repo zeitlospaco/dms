@@ -20,9 +20,15 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
     """Start OAuth2 login flow"""
-    # Use the configured OAuth redirect URI from environment
-    redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback")
-    print(f"Using configured OAuth redirect URI in login: {redirect_uri}")
+    # Use the provided redirect URI or fall back to environment variable
+    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+    default_redirect_uri = f"{frontend_url}/api/v1/auth/callback"
+    redirect_uri = redirect_uri or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", default_redirect_uri)
+    
+    # Remove any trailing slashes for consistency
+    redirect_uri = redirect_uri.rstrip('/')
+    
+    print(f"Using OAuth redirect URI in login: {redirect_uri}")
     flow, auth_url = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
     print(f"Generated auth URL with redirect URI: {redirect_uri}")
     # Store state parameter in session or validate it later
@@ -43,14 +49,14 @@ async def oauth_callback(
     # Handle error cases first
     if error:
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error={error}",
+            url=f"{frontend_url}/api/v1/auth/callback?error={error}",
             status_code=302
         )
     
     # Validate required parameters
     if not code:
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error=missing_code",
+            url=f"{frontend_url}/api/v1/auth/callback?error=missing_code",
             status_code=302
         )
     
@@ -58,14 +64,20 @@ async def oauth_callback(
     # TODO: Implement proper state validation using a secure storage mechanism
     if not state:
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error=missing_state",
+            url=f"{frontend_url}/api/v1/auth/callback?error=missing_state",
             status_code=302
         )
     """Handle OAuth2 callback"""
     try:
-        # Use the configured OAuth redirect URI from environment
-        redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://document-management-app-jbey7enb.devinapps.com/api/v1/auth/callback")
-        print(f"Using configured OAuth redirect URI in callback: {redirect_uri}")
+        # Use the provided redirect URI or fall back to environment variable
+        frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+        default_redirect_uri = f"{frontend_url}/api/v1/auth/callback"
+        redirect_uri = redirect_uri or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", default_redirect_uri)
+        
+        # Remove any trailing slashes for consistency
+        redirect_uri = redirect_uri.rstrip('/')
+        
+        print(f"Using OAuth redirect URI in callback: {redirect_uri}")
         flow, _ = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
         
         try:
@@ -160,7 +172,7 @@ async def oauth_callback(
         # Redirect to frontend callback with token
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
         return RedirectResponse(
-            url=f"{frontend_url}/callback?token={token}&state={state}",
+            url=f"{frontend_url}/api/v1/auth/callback?token={token}&state={state}",
             status_code=302
         )
             
