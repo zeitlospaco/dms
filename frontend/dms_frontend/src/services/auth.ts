@@ -18,57 +18,21 @@ export const initiateOAuth = async () => {
     
     console.log('Generating state parameter:', state);
     
-    // Use the configured OAuth redirect URI from environment
-    console.log('Requesting auth URL from backend');
-    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
-    console.log('Using redirect URI:', redirectUri);
-    const response = await api.get<AuthResponse>('/api/v1/auth/login', {
-      params: {
-        state,
-        redirect_uri: redirectUri
-      }
-    });
-    
-    console.log('Received response from backend:', response.data);
-    
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
     
-    return response.data;
+    // Redirect directly to backend OAuth endpoint
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    window.location.href = `${backendUrl}/api/v1/auth/login?state=${state}`;
+    
+    return { auth_url: '', state }; // Return empty auth_url since we're redirecting directly
   } catch (error) {
     console.error('Failed to initiate OAuth:', error);
     throw error;
   }
 };
 
-export const handleCallback = async (code: string, state: string) => {
-  try {
-    // Verify state parameter matches the one we stored
-    const storedState = localStorage.getItem('oauth_state');
-    if (!storedState || state !== storedState) {
-      throw new Error('Invalid state parameter');
-    }
-    
-    // Clear stored state
-    localStorage.removeItem('oauth_state');
-    
-    // Use the configured OAuth redirect URI from environment consistently
-    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
-    console.log('Using redirect URI for callback:', redirectUri);
-    
-    // Make the token exchange request to the backend
-    const response = await api.post('/api/v1/auth/token', {
-      code,
-      state,
-      redirect_uri: redirectUri
-    });
-    
-    return response.data;
-  } catch (error) {
-    console.error('Failed to handle OAuth callback:', error);
-    throw error;
-  }
-};
+// Remove handleCallback as it's now handled entirely by the backend
 
 export const refreshToken = async () => {
   try {

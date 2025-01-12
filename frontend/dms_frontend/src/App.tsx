@@ -10,7 +10,6 @@ import { CategorySelect } from './components/categories/CategorySelect';
 import { SmartSearch } from './components/insights/SmartSearch';
 import { HealthCheck } from './components/HealthCheck';
 import type { Document } from '@/types/document';
-import { handleCallback } from './services/auth';
 
 const queryClient = new QueryClient();
 
@@ -142,43 +141,7 @@ function App() {
         <Route path="/login">
           {isAuthenticated ? <Redirect to="/dashboard" /> : <Login />}
         </Route>
-        <Route path="/callback">
-          {() => {
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            const state = params.get('state');
-            const error = params.get('error');
-            
-            console.log('OAuth callback received:', { code: !!code, state: !!state, error });
-            
-            if (error) {
-              localStorage.removeItem('oauth_state');
-              localStorage.removeItem('auth_token');
-              return <Redirect to={`/login?error=${error}`} />;
-            }
-            
-            if (code && state) {
-              // Handle the callback in the frontend
-              handleCallback(code, state)
-                .then((response) => {
-                  if (response.token) {
-                    localStorage.setItem('auth_token', response.token);
-                    window.location.href = '/dashboard';
-                  } else {
-                    console.error('No token received from backend');
-                    window.location.href = '/login?error=auth_failed';
-                  }
-                })
-                .catch((error) => {
-                  console.error('Failed to handle callback:', error);
-                  window.location.href = '/login?error=auth_failed';
-                });
-              return <div>Processing authentication...</div>;
-            }
-            
-            return <Redirect to="/login?error=invalid_callback" />;
-          }}
-        </Route>
+
         <Route path="/dashboard">
           {isAuthenticated ? <DashboardContent /> : <Redirect to="/login" />}
         </Route>
