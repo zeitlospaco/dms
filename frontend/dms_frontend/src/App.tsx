@@ -142,7 +142,7 @@ function App() {
         <Route path="/login">
           {isAuthenticated ? <Redirect to="/dashboard" /> : <Login />}
         </Route>
-        <Route path="/api/v1/auth/callback">
+        <Route path="/callback">
           {() => {
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
@@ -158,18 +158,9 @@ function App() {
             }
             
             if (code && state) {
-              // Handle the OAuth callback with code and state
-              handleCallback(code, state)
-                .then((response: TokenResponse) => {
-                  localStorage.setItem('auth_token', response.token);
-                  localStorage.removeItem('oauth_state');
-                  window.location.href = '/dashboard';
-                })
-                .catch((err: Error) => {
-                  console.error('OAuth callback error:', err);
-                  window.location.href = '/login?error=auth_failed';
-                });
-              return <div>Processing authentication...</div>;
+              // Redirect to backend with the auth code
+              window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/callback${window.location.search}`;
+              return <div>Redirecting to authentication service...</div>;
             }
             
             return <Redirect to="/login?error=invalid_callback" />;
