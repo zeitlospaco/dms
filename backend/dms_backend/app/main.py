@@ -62,7 +62,7 @@ async def log_requests(request: Request, call_next):
     return response
 
 # Include routers with API prefix
-app.include_router(auth.router, prefix="/api/v1")
+app.include_router(auth.router)  # prefix already included in router definition
 app.include_router(documents.router, prefix="/api/v1")
 app.include_router(categories.router, prefix="/api/v1")
 app.include_router(logs.router, prefix="/api/v1")
