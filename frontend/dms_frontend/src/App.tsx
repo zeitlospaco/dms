@@ -10,7 +10,7 @@ import { CategorySelect } from './components/categories/CategorySelect';
 import { SmartSearch } from './components/insights/SmartSearch';
 import { HealthCheck } from './components/HealthCheck';
 import type { Document } from '@/types/document';
-import { handleCallback, type TokenResponse } from './services/auth';
+import { handleCallback } from './services/auth';
 
 const queryClient = new QueryClient();
 
@@ -160,13 +160,18 @@ function App() {
             if (code && state) {
               // Handle the callback in the frontend
               handleCallback(code, state)
-                .then((response: TokenResponse) => {
-                  localStorage.setItem('auth_token', response.token);
-                  window.location.href = '/dashboard';
+                .then((response) => {
+                  if (response.token) {
+                    localStorage.setItem('auth_token', response.token);
+                    window.location.href = '/dashboard';
+                  } else {
+                    console.error('No token received from backend');
+                    window.location.href = '/login?error=auth_failed';
+                  }
                 })
                 .catch((error) => {
                   console.error('Failed to handle callback:', error);
-                  return <Redirect to={`/login?error=auth_failed`} />;
+                  window.location.href = '/login?error=auth_failed';
                 });
               return <div>Processing authentication...</div>;
             }
