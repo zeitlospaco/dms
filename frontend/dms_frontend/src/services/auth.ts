@@ -23,7 +23,7 @@ export const initiateOAuth = async () => {
     
     // Redirect directly to backend OAuth endpoint
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
-    window.location.href = `${backendUrl}/api/v1/auth/login?state=${state}`;
+    window.location.href = `${backendUrl}/login?state=${state}`;
     
     return { auth_url: '', state }; // Return empty auth_url since we're redirecting directly
   } catch (error) {
