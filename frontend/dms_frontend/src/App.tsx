@@ -158,9 +158,17 @@ function App() {
             }
             
             if (code && state) {
-              // Redirect to backend with the auth code
-              window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/callback${window.location.search}`;
-              return <div>Redirecting to authentication service...</div>;
+              // Handle the callback in the frontend
+              handleCallback(code, state)
+                .then((response: TokenResponse) => {
+                  localStorage.setItem('auth_token', response.token);
+                  window.location.href = '/dashboard';
+                })
+                .catch((error) => {
+                  console.error('Failed to handle callback:', error);
+                  return <Redirect to={`/login?error=auth_failed`} />;
+                });
+              return <div>Processing authentication...</div>;
             }
             
             return <Redirect to="/login?error=invalid_callback" />;
