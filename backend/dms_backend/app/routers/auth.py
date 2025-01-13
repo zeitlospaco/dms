@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 @router.get("/login")
-async def login(state: str, redirect_uri: Optional[str] = None):
+async def login(state: str):
     """Start OAuth2 login flow"""
     # Always use backend URL for OAuth callback
     backend_url = os.getenv("BACKEND_URL", "https://app-frgtiqwl-blue-grass-9650.fly.dev")

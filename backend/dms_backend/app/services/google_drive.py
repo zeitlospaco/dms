@@ -32,11 +32,9 @@ class GoogleDriveService:
             self.service = build('drive', 'v3', credentials=credentials)
     
     @classmethod
-    def create_auth_url(cls, redirect_uri: Optional[str] = None) -> tuple[Flow, str]:
+    def create_auth_url(cls, redirect_uri: str) -> tuple[Flow, str]:
         """Create OAuth2 authorization URL"""
-        # Use the provided redirect URI or fall back to environment variable
-        if not redirect_uri:
-            redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/callback")
+        # Always require and use the provided redirect URI
         print(f"Using OAuth redirect URI in create_auth_url: {redirect_uri}")
 
         flow = Flow.from_client_config(
