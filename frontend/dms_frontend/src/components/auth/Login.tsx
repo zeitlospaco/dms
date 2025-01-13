@@ -35,12 +35,8 @@ export function Login() {
           const { auth_url } = await initiateOAuth();
           console.log('Received auth URL:', auth_url);
           
-          // Parse and validate the auth URL
-          const authUrlObj = new URL(auth_url);
-          console.log('Parsed auth URL:', authUrlObj.toString());
-          
-          // Navigate to the auth URL without modifying the redirect URI
-          window.location.href = authUrlObj.toString();
+          // Navigate to the auth URL
+          window.location.href = auth_url;
         } catch (error) {
           console.error('Failed to initiate OAuth:', error);
         }
