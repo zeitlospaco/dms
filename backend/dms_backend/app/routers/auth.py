@@ -22,7 +22,8 @@ async def login(state: str, redirect_uri: Optional[str] = None):
     """Start OAuth2 login flow"""
     # Use the provided redirect URI or fall back to environment variable
     frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-    default_redirect_uri = f"{frontend_url}/callback"
+    backend_url = os.getenv("BACKEND_URL", "https://app-frgtiqwl-blue-grass-9650.fly.dev")
+    default_redirect_uri = f"{backend_url}/api/v1/auth/callback"
     redirect_uri = redirect_uri or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", default_redirect_uri)
     
     # Remove any trailing slashes for consistency
@@ -71,7 +72,8 @@ async def oauth_callback(
     try:
         # Use the provided redirect URI or fall back to environment variable
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
-        default_redirect_uri = f"{frontend_url}/callback"
+        backend_url = os.getenv("BACKEND_URL", "https://app-frgtiqwl-blue-grass-9650.fly.dev")
+        default_redirect_uri = f"{backend_url}/api/v1/auth/callback"
         redirect_uri = redirect_uri or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", default_redirect_uri)
         
         # Remove any trailing slashes for consistency
