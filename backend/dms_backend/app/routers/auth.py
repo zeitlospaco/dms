@@ -49,14 +49,14 @@ async def oauth_callback(
     # Handle error cases first
     if error:
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error={error}",
+            url=f"{frontend_url}/#/auth/callback?error={error}",
             status_code=302
         )
     
     # Validate required parameters
     if not code:
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error=missing_code",
+            url=f"{frontend_url}/#/auth/callback?error=missing_code",
             status_code=302
         )
     
@@ -64,7 +64,7 @@ async def oauth_callback(
     # TODO: Implement proper state validation using a secure storage mechanism
     if not state:
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error=missing_state",
+            url=f"{frontend_url}/#/auth/callback?error=missing_state",
             status_code=302
         )
     """Handle OAuth2 callback"""
@@ -106,7 +106,7 @@ async def oauth_callback(
                 print(f"Notice: Scope expanded from \"{' '.join(required_scopes_set)}\" to \"{' '.join(granted_scopes_set)}\".")
                 frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
                 return RedirectResponse(
-                    url=f"{frontend_url}/callback?error=insufficient_scopes",
+                    url=f"{frontend_url}/#/auth/callback?error=insufficient_scopes",
                     status_code=302
                 )
             
@@ -119,7 +119,7 @@ async def oauth_callback(
             print(f"Scope validation error: {str(e)}")
             frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
             return RedirectResponse(
-                url=f"{frontend_url}/callback?error=insufficient_scopes",
+                url=f"{frontend_url}/#/auth/callback?error=insufficient_scopes",
                 status_code=302
             )
         
@@ -172,7 +172,7 @@ async def oauth_callback(
         # Redirect to frontend callback with token
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
         return RedirectResponse(
-            url=f"{frontend_url}/callback?token={token}&state={state}",
+            url=f"{frontend_url}/#/auth/callback?token={token}&state={state}",
             status_code=302
         )
             
@@ -180,7 +180,7 @@ async def oauth_callback(
         print(f"OAuth callback error: {str(e)}")
         frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
         return RedirectResponse(
-            url=f"{frontend_url}/callback?error=auth_failed",
+            url=f"{frontend_url}/#/auth/callback?error=auth_failed",
             status_code=302
         )
 
