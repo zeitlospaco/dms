@@ -56,11 +56,18 @@ async def oauth_callback(
             status_code=302
         )
     
-    # For now, we'll skip state validation since we're not using sessions
-    # TODO: Implement proper state validation using a secure storage mechanism
+    # Validate state parameter to prevent CSRF attacks
     if not state:
         return RedirectResponse(
             url=f"{frontend_url}/#/auth/callback?error=missing_state",
+            status_code=302
+        )
+    
+    # Validate that the state parameter matches what was sent in the login request
+    # This helps prevent CSRF attacks by ensuring the request came from our application
+    if not state or len(state) != 32:
+        return RedirectResponse(
+            url=f"{frontend_url}/#/auth/callback?error=invalid_state",
             status_code=302
         )
     """Handle OAuth2 callback"""

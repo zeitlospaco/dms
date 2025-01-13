@@ -21,9 +21,16 @@ export const initiateOAuth = async () => {
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
     
-    // Get auth URL from backend without sending redirect_uri
+    // Get auth URL from backend with state parameter
     const response = await api.get(`/api/v1/auth/login?state=${state}`);
     console.log('Received auth URL from backend:', response.data.auth_url);
+    
+    // Validate that the returned state matches our generated state
+    if (response.data.state !== state) {
+      console.error('State parameter mismatch in auth response');
+      throw new Error('Invalid state parameter in auth response');
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Failed to initiate OAuth:', error);
