@@ -21,10 +21,9 @@ export const initiateOAuth = async () => {
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
     
-    // Use backend URL for OAuth callback
+    // Always use backend URL for OAuth callback
     const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
-    const backendUrl = 'https://app-frgtiqwl-blue-grass-9650.fly.dev';
-    const redirectUri = `${backendUrl}/api/v1/auth/callback`;
+    const redirectUri = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/callback`;
     console.log('Using redirect URI:', redirectUri);
     const scope = encodeURIComponent([
       'https://www.googleapis.com/auth/drive',
