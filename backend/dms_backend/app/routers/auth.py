@@ -20,14 +20,9 @@ router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 @router.get("/login")
 async def login(state: str, redirect_uri: Optional[str] = None):
     """Start OAuth2 login flow"""
-    # Use the provided redirect URI or fall back to environment variable
-    frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+    # Always use backend URL for OAuth callback
     backend_url = os.getenv("BACKEND_URL", "https://app-frgtiqwl-blue-grass-9650.fly.dev")
-    default_redirect_uri = f"{backend_url}/api/v1/auth/callback"
-    redirect_uri = redirect_uri or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", default_redirect_uri)
-    
-    # Remove any trailing slashes for consistency
-    redirect_uri = redirect_uri.rstrip('/')
+    redirect_uri = f"{backend_url}/api/v1/auth/callback"
     
     print(f"Using OAuth redirect URI in login: {redirect_uri}")
     flow, auth_url = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
@@ -70,14 +65,9 @@ async def oauth_callback(
         )
     """Handle OAuth2 callback"""
     try:
-        # Use the provided redirect URI or fall back to environment variable
-        frontend_url = os.getenv("FRONTEND_URL", "https://document-management-app-jbey7enb.devinapps.com")
+        # Always use backend URL for OAuth callback
         backend_url = os.getenv("BACKEND_URL", "https://app-frgtiqwl-blue-grass-9650.fly.dev")
-        default_redirect_uri = f"{backend_url}/api/v1/auth/callback"
-        redirect_uri = redirect_uri or os.getenv("GOOGLE_OAUTH_REDIRECT_URI", default_redirect_uri)
-        
-        # Remove any trailing slashes for consistency
-        redirect_uri = redirect_uri.rstrip('/')
+        redirect_uri = f"{backend_url}/api/v1/auth/callback"
         
         print(f"Using OAuth redirect URI in callback: {redirect_uri}")
         flow, _ = GoogleDriveService.create_auth_url(redirect_uri=redirect_uri)
