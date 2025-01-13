@@ -21,10 +21,10 @@ export const initiateOAuth = async () => {
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
     
-    // Use backend URL for OAuth callback
+    // Use frontend URL for OAuth callback to match Google Console configuration
     const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
-    const backendUrl = import.meta.env.VITE_API_URL || 'https://app-frgtiqwl-blue-grass-9650.fly.dev';
-    const redirectUri = `${backendUrl}/api/v1/auth/callback`;
+    const frontendUrl = 'https://document-management-app-jbey7enb.devinapps.com';
+    const redirectUri = `${frontendUrl}/api/v1/auth/callback`;
     console.log('Using redirect URI:', redirectUri);
     const scope = encodeURIComponent([
       'https://www.googleapis.com/auth/drive',
