@@ -21,35 +21,10 @@ export const initiateOAuth = async () => {
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
     
-    // Use the configured OAuth redirect URI
-    const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
-    const redirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
-    console.log('Using redirect URI:', redirectUri);
-    const scope = encodeURIComponent([
-      'https://www.googleapis.com/auth/drive',
-      'https://www.googleapis.com/auth/drive.file',
-      'https://www.googleapis.com/auth/drive.metadata.readonly',
-      'https://www.googleapis.com/auth/drive.metadata',
-      'https://www.googleapis.com/auth/drive.readonly',
-      'https://www.googleapis.com/auth/drive.photos.readonly',
-      'https://www.googleapis.com/auth/drive.apps.readonly',
-      'https://www.googleapis.com/auth/drive.appdata',
-      'https://www.googleapis.com/auth/drive.meet.readonly',
-      'https://www.googleapis.com/auth/drive.scripts'
-    ].join(' '));
-    
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-      `client_id=${encodeURIComponent(clientId)}&` +
-      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `response_type=code&` +
-      `scope=${scope}&` +
-      `access_type=offline&` +
-      `state=${state}&` +
-      `prompt=consent`;
-    
-    console.log('Generated auth URL:', authUrl);
-    
-    return { auth_url: authUrl, state };
+    // Get auth URL from backend
+    const response = await api.get(`/api/v1/auth/login?state=${state}`);
+    console.log('Received auth URL from backend:', response.data.auth_url);
+    return response.data;
   } catch (error) {
     console.error('Failed to initiate OAuth:', error);
     throw error;
