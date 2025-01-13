@@ -25,6 +25,19 @@ export const initiateOAuth = async () => {
     const response = await api.get(`/api/v1/auth/login?state=${state}`);
     console.log('Received auth URL from backend:', response.data.auth_url);
     
+    // Verify the auth URL contains the correct redirect URI
+    const authUrl = new URL(response.data.auth_url);
+    const redirectUri = authUrl.searchParams.get('redirect_uri');
+    console.log('Redirect URI from auth URL:', redirectUri);
+    
+    // Verify it matches our configured redirect URI
+    const expectedRedirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
+    console.log('Expected redirect URI:', expectedRedirectUri);
+    
+    if (redirectUri !== expectedRedirectUri) {
+      console.error('Redirect URI mismatch:', { received: redirectUri, expected: expectedRedirectUri });
+    }
+    
     // Validate that the returned state matches our generated state
     if (response.data.state !== state) {
       console.error('State parameter mismatch in auth response');

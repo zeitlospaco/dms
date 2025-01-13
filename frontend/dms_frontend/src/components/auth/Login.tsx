@@ -27,6 +27,10 @@ export function Login() {
 
         // Start new OAuth flow
         console.log('Starting new OAuth flow');
+        console.log('Frontend URL:', import.meta.env.VITE_FRONTEND_URL);
+        console.log('Backend URL:', import.meta.env.VITE_BACKEND_URL);
+        console.log('OAuth Redirect URI:', import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI);
+        
         try {
           // Clear any existing OAuth state
           localStorage.removeItem('oauth_state');
