@@ -21,7 +21,7 @@ export const initiateOAuth = async () => {
     // Store state in localStorage for validation after redirect
     localStorage.setItem('oauth_state', state);
     
-    // Get auth URL from backend
+    // Get auth URL from backend without sending redirect_uri
     const response = await api.get(`/api/v1/auth/login?state=${state}`);
     console.log('Received auth URL from backend:', response.data.auth_url);
     return response.data;
