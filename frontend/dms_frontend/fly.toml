@@ -20,7 +20,7 @@ primary_region = "sea"
 [env]
   VITE_API_URL = "https://app-frgtiqwl-blue-grass-9650.fly.dev"
   VITE_GOOGLE_OAUTH_CLIENT_ID = "701201679988-racsm7mcvro3q8td3k71a6aeu8pr4p1a.apps.googleusercontent.com"
-  VITE_GOOGLE_OAUTH_REDIRECT_URI = "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/verify"
+  VITE_GOOGLE_OAUTH_REDIRECT_URI = "https://app-frgtiqwl-blue-grass-9650.fly.dev/api/v1/auth/callback"
   VITE_FRONTEND_URL = "https://document-management-app-jbey7enb.devinapps.com"
   VITE_BACKEND_URL = "https://app-frgtiqwl-blue-grass-9650.fly.dev"
   VITE_GOOGLE_API_KEY = "AIzaSyD8qbT8SsqkRbS8vEg9EreeXFxpCYlHgBw"
