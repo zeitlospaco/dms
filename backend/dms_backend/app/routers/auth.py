@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
+from google.oauth2 import id_token
+from google.auth.transport import requests
 import json
 import os
 from typing import Optional
@@ -16,6 +18,40 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
+
+@router.post("/verify")
+async def verify_google_token(request: Request, db: Session = Depends(get_db)):
+    """Verify Google OAuth token and create/update user"""
+    try:
+        # Get the request body
+        body = await request.json()
+        credential = body.get("credential")
+        
+        if not credential:
+            raise HTTPException(status_code=400, detail="Missing credential")
+            
+        # Verify the Google token
+        client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+        try:
+            id_info = id_token.verify_oauth2_token(credential, requests.Request(), client_id)
+            email = id_info['email']
+        except ValueError as e:
+            print(f"Token verification error: {str(e)}")
+            raise HTTPException(status_code=401, detail="Invalid token")
+            
+        # Find or create user
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            user = User(email=email)
+            db.add(user)
+            db.commit()
+            
+        # Generate access token (you can use your existing token generation logic)
+        return {"token": credential, "email": email}
+        
+    except Exception as e:
+        print(f"Verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Authentication failed")
 
 @router.get("/login")
 async def login(state: str):
