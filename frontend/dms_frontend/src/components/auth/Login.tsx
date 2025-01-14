@@ -47,8 +47,12 @@ export function Login() {
             <GoogleLogin
               onSuccess={onSuccess}
               onError={onError}
-              useOneTap
-              auto_select
+              type="standard"
+              theme="filled_blue"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              useOneTap={false}
             />
           </div>
           {urlParams?.get('error') && (

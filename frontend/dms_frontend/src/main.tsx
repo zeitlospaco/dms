@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import './index.css'
 import App from './App.tsx'
 
@@ -21,9 +22,11 @@ if (!root) {
     const app = createRoot(root);
     app.render(
       <StrictMode>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <GoogleOAuthProvider clientId="701201679988-racsm7mcvro3q8td3k71a6aeu8pr4p1a.apps.googleusercontent.com">
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </GoogleOAuthProvider>
       </StrictMode>,
     );
     console.log('Initial render complete');
