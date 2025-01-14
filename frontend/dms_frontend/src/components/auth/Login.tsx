@@ -49,7 +49,6 @@ export function Login() {
               onError={onError}
               useOneTap
               auto_select
-              ux_mode="redirect"
             />
           </div>
           {urlParams?.get('error') && (

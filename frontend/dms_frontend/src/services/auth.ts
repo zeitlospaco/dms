@@ -4,13 +4,18 @@ export interface TokenResponse {
   token: string;
 }
 
-export const handleGoogleLogin = async (credentialResponse: any) => {
+export const handleGoogleLogin = async (credentialResponse: { credential?: string }) => {
   try {
-    // Send the credential to our backend for verification
+    if (!credentialResponse.credential) {
+      throw new Error('No credential received from Google');
+    }
+
+    console.log('Sending credential to backend for verification');
     const response = await api.post('/api/v1/auth/verify', {
       credential: credentialResponse.credential
     });
     
+    console.log('Backend verification response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Failed to verify Google credentials:', error);
