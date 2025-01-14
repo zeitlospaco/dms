@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { handleGoogleLogin } from '../../services/auth';
 
 export function Login() {
@@ -15,11 +15,14 @@ export function Login() {
     }
   }, [history]);
 
-  const onSuccess = async (credentialResponse: any) => {
+  const onSuccess = async (credentialResponse: CredentialResponse) => {
     try {
+      console.log('Google OAuth success:', credentialResponse);
       const result = await handleGoogleLogin(credentialResponse);
       if (result.token) {
         localStorage.setItem('auth_token', result.token);
+        localStorage.setItem('user_email', result.email);
+        console.log('Login successful, redirecting to dashboard');
         history.push('/dashboard');
       }
     } catch (error) {
@@ -45,6 +48,8 @@ export function Login() {
               onSuccess={onSuccess}
               onError={onError}
               useOneTap
+              auto_select
+              ux_mode="redirect"
             />
           </div>
           {urlParams?.get('error') && (
