@@ -1,52 +1,19 @@
 import api from './api';
 
-export interface AuthResponse {
-  auth_url: string;
-  state: string;
-}
-
 export interface TokenResponse {
   token: string;
 }
 
-export const initiateOAuth = async () => {
+export const handleGoogleLogin = async (credentialResponse: any) => {
   try {
-    // Generate a random state parameter for CSRF protection
-    const randomBytes = new Uint8Array(16);
-    window.crypto.getRandomValues(randomBytes);
-    const state = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
-    
-    console.log('Generating state parameter:', state);
-    
-    // Store state in localStorage for validation after redirect
-    localStorage.setItem('oauth_state', state);
-    
-    // Get auth URL from backend with state parameter
-    const response = await api.get(`/api/v1/auth/login?state=${state}`);
-    console.log('Received auth URL from backend:', response.data.auth_url);
-    
-    // Verify the auth URL contains the correct redirect URI
-    const authUrl = new URL(response.data.auth_url);
-    const redirectUri = authUrl.searchParams.get('redirect_uri');
-    console.log('Redirect URI from auth URL:', redirectUri);
-    
-    // Verify it matches our configured redirect URI
-    const expectedRedirectUri = import.meta.env.VITE_GOOGLE_OAUTH_REDIRECT_URI;
-    console.log('Expected redirect URI:', expectedRedirectUri);
-    
-    if (redirectUri !== expectedRedirectUri) {
-      console.error('Redirect URI mismatch:', { received: redirectUri, expected: expectedRedirectUri });
-    }
-    
-    // Validate that the returned state matches our generated state
-    if (response.data.state !== state) {
-      console.error('State parameter mismatch in auth response');
-      throw new Error('Invalid state parameter in auth response');
-    }
+    // Send the credential to our backend for verification
+    const response = await api.post('/api/v1/auth/verify', {
+      credential: credentialResponse.credential
+    });
     
     return response.data;
   } catch (error) {
-    console.error('Failed to initiate OAuth:', error);
+    console.error('Failed to verify Google credentials:', error);
     throw error;
   }
 };
