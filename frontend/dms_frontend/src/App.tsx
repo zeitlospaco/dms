@@ -146,7 +146,11 @@ function App() {
           {isAuthenticated ? <DashboardContent /> : <Redirect to="/login" />}
         </Route>
         <Route exact path="/">
-          {isAuthenticated ? <DashboardContent /> : <Login />}
+          {isAuthenticated ? (
+            <Redirect to="/dashboard" />
+          ) : (
+            <Login />
+          )}
         </Route>
       </Switch>
     </QueryClientProvider>
